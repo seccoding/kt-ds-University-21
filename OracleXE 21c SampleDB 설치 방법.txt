@@ -1,0 +1,34 @@
+1. HR Scheme Download
+    https://github.com/oracle-samples/db-sample-schemas/releases
+
+2. HR Scheme 설치
+    C:\app\mcjang\product\21c\dbhomeXE\demo\schema
+    에 다운로드 한 파일 복사 > 붙여넣기
+    폴더명 "human_resources" 으로 변경
+
+3.  HR 계정 생성 및 스키마 설치
+    Windows + R > CMD
+    > sqlplus
+    > 사용자명: sys as sysdba
+    > 비밀번호: DB 설치시 입력한 비밀번호
+
+    SQL> ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;
+    SQL> @?/demo/schema/human_resources/human_resources/hr_main.sql
+
+    1의 값: hr
+    2의 값: users
+    3의 값: temp
+    4의 값: DB 설치시 입력한 비밀번호
+    5의 값: C:\app\mcjang\product\21c\dbhomeXE\demo\schema\log
+    6의 값: localhost:1521/xe
+
+4. SP2-0310 에러 발생시
+    C:\app\mcjang\product\21c\dbhomeXE\demo\schema\human_resources\human_resources\hr_main.sql 수정
+    __SUB__CWD__ --> ?/demo/schema/human_resources 로 변경
+    후 2번부터 다시 시작
+
+5. 완료 후 SYS 계정으로 DB 접속 후 아래 명령 실행
+    ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;
+    ALTER USER hr ACCOUNT UNLOCK IDENTIFIED BY 1592; -- 1592 자리에 비밀번호 작성
+
+6. HR 계정 접속. 완료
