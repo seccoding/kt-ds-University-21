@@ -1,3 +1,9 @@
+# OracleXE 21c Download
+    1. https://www.oracle.com/database/technologies/xe-downloads.html
+    2. Oracle Database 21c Express Edition for Windows x64 다운로드 및 설치
+    !! 설치시 비밀번호 반드시 기억할 것 !!
+    
+# SampleDB 설치
 1. HR Scheme Download
     https://github.com/oracle-samples/db-sample-schemas/releases
 
