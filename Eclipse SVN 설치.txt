@@ -1,0 +1,14 @@
+1. Subversive 삭제
+	1-1. Help - Eclipse Marketplace
+				Installed
+					Subversive - SVN Team Provider 4.0.5 - > Uninstall
+	1-2. Help - Eclipse Marketplace
+				Subclipse 검색
+					Subclipse 4.3.3 설치
+						Trust 창 뜨면 Select All 클릭 -> Trust Selected 클릭
+	1-3. SVN Repository Exploring Perspective 선택
+				SVN Repositories 영역에서 우클릭
+					New -> Repository Location
+						URL: https://192.168.211.11/svn/test
+						Finish 클릭
+				trunk > general_achi > 우클릭 > import
