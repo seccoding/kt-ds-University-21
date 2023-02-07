@@ -1,0 +1,200 @@
+package com.ktdsuniversity.edu.stream;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public class BaseballStream99 {
+
+	public static List<AllStarFullVO> readAllStarFull() {
+		
+		try {
+			List<AllStarFullVO> list = Files.readAllLines(Paths.get("C:\\Devs\\data\\baseball\\core\\AllstarFull.csv"))
+					.stream()
+					.skip(1)
+					.map( (line) -> {
+						String[] strArr = line.split(",");
+						AllStarFullVO vo = new AllStarFullVO();
+						vo.setPlayerID(strArr[0]);
+						vo.setYear(strArr[1]);
+						vo.setGameNum(Integer.parseInt(strArr[2]));
+						vo.setGameID(strArr[3]);
+						vo.setTeamID(strArr[4]);
+						vo.setLgID(strArr[5]);
+						vo.setGp(Integer.parseInt(strArr[6]));
+						if (strArr.length == 8) {
+							vo.setStartingPos(Integer.parseInt(strArr[7]));
+						}
+						else {
+							vo.setStartingPos(0);
+						}
+						return vo;
+					} )
+					.collect(Collectors.toList());
+			return list;
+		}
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+			return new ArrayList<>();
+		}
+		
+	}
+	
+	public static void main(String[] args) {
+		
+		List<AllStarFullVO> list = readAllStarFull();
+		
+		// 1. gameNum 이 0 이 아닌 것을 추출해 출력하세요.
+		List<AllStarFullVO> notNum = list.stream()
+										 .filter( (vo) -> vo.getGameNum()!=0)
+										 .collect(Collectors.toList());
+		notNum.forEach(vo -> {
+			System.out.println(vo.getPlayerID());
+			System.out.println(vo.getGameNum());
+		});
+		
+		// 2. gameNum 이 0 인 것을 추출해 출력하세요.
+		List<AllStarFullVO> gameNum0 = list.stream()
+										   .filter( (vo) -> vo.getGameNum()==0 )
+										   .collect(Collectors.toList());
+		
+		gameNum0.forEach( (vo) -> {
+			System.out.println(vo.getPlayerID());
+			System.out.println(vo.getGameNum());
+		});
+		
+		// 3. 1950년대에 플레이한 선수의 이름만 출력하세요.
+		list.stream()
+			.filter((vo)->vo.getYear().startsWith("195"))
+			.map((vo)->vo.getPlayerID())
+			.forEach(System.out::println);
+
+		// 4. 2000년대 BOS 팀의 선수 이름을 중복 제거한 후 출력하세요.
+		list.stream()
+			.filter((vo) -> vo.getYear().startsWith("200"))
+			.filter((vo) -> vo.getTeamID().equals("BOS"))
+			.map((vo) -> vo.getPlayerID())
+			.distinct()
+			.forEach(System.out::println);
+		
+		// 5. 1937년 DET 팀의 선수 중 첫 번째 선수 이름을 출력하세요.
+		AllStarFullVO first = list.stream()
+		                          .filter((vo) -> vo.getYear().equals("1937"))
+		                          .filter((vo) -> vo.getTeamID().equals("DET"))
+		                          .findFirst().orElse(new AllStarFullVO() );
+		System.out.println(first.getPlayerID());
+		
+		// 6. GP 1, startingPos 가 3 인 선수의 이름을 출력하세요.
+		list.stream()
+			.filter( (vo) -> vo.getGp() == 1)
+			.filter( (vo) -> vo.getStartingPos() ==3)
+			.forEach( (vo) -> {
+				System.out.println(vo.getPlayerID());
+			});
+		
+		// 7. BOS팀에 있는 선수는 총 몇명인가요?
+		long team = list.stream()
+			.filter(vo -> vo.getTeamID().equals("BOS"))
+			.count();
+		System.out.println(team);
+		
+		// 8. 이름이 foxx로 시작하는 선수의 플레이 연도를 중복 제거한 후 출력하세요.
+		// startsWith로 접근
+		//distinct
+		list.stream()
+		    .filter(vo -> vo.getPlayerID().startsWith("foxx"))
+		    .map(vo -> vo.getYear())
+		    .distinct()
+		    .forEach(System.out::println);
+		    
+		
+		// 9. lombaer01 선수는 몇년도에 어느 팀에서 플레이 했나요?
+		list.stream()
+			.filter( vo -> vo.getPlayerID().equals("lombaer01") )
+			.forEach(vo -> {
+				System.out.println(vo.getYear());
+				System.out.println(vo.getTeamID());
+			});
+		
+		list.stream()
+			.filter( (vo) -> vo.getPlayerID().equals("lombaer01") )
+			.map( (vo) -> vo.getYear() + " > " + vo.getTeamID() )
+			.forEach(System.out::println);
+		
+		// 10. muncyma01 선수의 year, startingPos와 teamID 를 출력하세요.
+		list.stream()
+			.filter( vo -> vo.getPlayerID().equals("muncyma01"))
+			.map( vo -> vo.getYear() + vo.getStartingPos() + vo.getTeamID())
+			.forEach(System.out::println);
+		
+		// 11. 2015년에 hernafe02 선수는 몇 번 출전 했나요?
+		long cnt = list.stream()
+			.filter(vo->vo.getYear().equals("2015"))
+			.filter(vo -> vo.getPlayerID().equals("hernafe02"))
+			.count();
+		System.out.println(cnt);
+		
+		// 12. ATL 팀이 몇 년도에 경기에 출전 했나요?
+		list.stream()
+		  	.filter( (allStarVO) -> allStarVO.getTeamID().equals("ATL")  )
+		  	.map( (allStarVO) -> allStarVO.getYear() )
+		  	.distinct()
+		  	.forEach( year ->
+		  			System.out.println(year)  );
+		
+		// 13. W 로 시작하는 팀은 몇 년도에 경기에 출전 했나요?
+		
+		list.stream()
+			.filter( vo -> vo.getTeamID().startsWith("W"))
+			.map( vo -> vo.getYear())
+			.distinct()
+			.forEach(System.out::println);
+		
+		// 14. GP와 startingPos가 모두 0인 선수 중 PHA 팀에 소속했던 선수는 누구인가요?
+		
+		list.stream()
+			.filter( vo -> vo.getGp() == 0)
+			.filter( vo -> vo.getStartingPos() == 0)
+			.filter( vo -> vo.getTeamID().equals("PHA"))
+			.map( vo -> vo.getPlayerID())
+			.forEach(System.out::println);
+		
+		// 15. playerID의 자리수가 8자리인 선수의 활동연도를 중복 제거하여 출력하세요.
+		list.stream()
+			.filter(vo -> vo.getPlayerID().length()==8)
+			.map(vo -> vo.getYear())
+			.distinct()
+			.forEach(System.out::println);
+
+		// 16. playerID의 값이 02 또는 03으로 끝나는 선수의 
+		//     팀코드를 중복제거 하고 정렬하여 출력하세요.
+		list.stream()
+			.filter(vo->vo.getPlayerID().endsWith("02")||vo.getPlayerID().endsWith("03"))
+			.map(vo->vo.getTeamID())
+			.distinct()
+			.sorted()
+			.forEach(System.out::println);
+		
+		// 17. lgID의 값이 AL, 
+		//     GameID는 60 으로 끝나며 
+		//     소속팀은 DET, playerID는 f로 시작하는 
+		//     첫 번째 선수의 playerID를 출력하고
+		//     만약 존재하지 않는다면 "없음" 을 출력하세요.
+		Optional<String> plID= list.stream()
+			.filter( (vo) -> vo.getGameID().endsWith("60"))
+			.filter( (vo) -> vo.getTeamID().equals("DET"))
+			.filter( (vo) -> vo.getPlayerID().startsWith("f"))
+			.filter( (vo) -> vo.getLgID().equals("AL"))
+			.map((vo)->vo.getPlayerID())
+			.findFirst();
+
+		System.out.println(plID.orElse("없음"));
+			
+
+	}
+	
+}
