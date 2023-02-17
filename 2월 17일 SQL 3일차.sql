@@ -370,12 +370,12 @@ SELECT DEPARTMENT_ID
 SELECT DEP.DEPARTMENT_NAME 
      , EMP.FIRST_NAME 
   FROM (SELECT DEPARTMENT_ID
-		  FROM (SELECT COUNT(1) AS CNT
+          FROM (SELECT COUNT(1) AS CNT
 		             , DEPARTMENT_ID
-		          FROM EMPLOYEES
-		         GROUP BY DEPARTMENT_ID
-		         ORDER BY CNT DESC)
-		 WHERE ROWNUM = 1) TOP_DEP
+                  FROM EMPLOYEES
+                 GROUP BY DEPARTMENT_ID
+                 ORDER BY CNT DESC)
+         WHERE ROWNUM = 1) TOP_DEP
   INNER JOIN DEPARTMENTS DEP
      ON TOP_DEP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
   INNER JOIN EMPLOYEES EMP
@@ -388,10 +388,10 @@ SELECT DEP.DEPARTMENT_NAME
  INNER JOIN EMPLOYEES EMP
     ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID 
  WHERE DEP.DEPARTMENT_ID = (SELECT DEPARTMENT_ID
-							  FROM (SELECT COUNT(1) AS CNT
-							             , DEPARTMENT_ID
-							          FROM EMPLOYEES
-							         GROUP BY DEPARTMENT_ID
-							         ORDER BY CNT DESC)
-							 WHERE ROWNUM = 1)
+                              FROM (SELECT COUNT(1) AS CNT
+                                         , DEPARTMENT_ID
+                                      FROM EMPLOYEES
+                                     GROUP BY DEPARTMENT_ID
+                                     ORDER BY CNT DESC)
+                             WHERE ROWNUM = 1)
 ;
