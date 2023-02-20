@@ -31,7 +31,7 @@
 4. SP2-0310 에러 발생시
     C:\app\mcjang\product\21c\dbhomeXE\demo\schema\human_resources\human_resources\hr_main.sql 수정
     __SUB__CWD__ --> ?/demo/schema/human_resources 로 변경
-    후 2번부터 다시 시작
+    후 3번부터 다시 시작
 
 5. 완료 후 SYS 계정으로 DB 접속 후 아래 명령 실행
     ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;
