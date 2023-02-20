@@ -126,19 +126,103 @@ SELECT *
 -- PU_MAN -> PM
 -- 다 아니면 '-'
 -- 으로 변환하여 조회
+-- JOB_ID, MIN_JOB_ID
+SELECT JOB_ID
+     , DECODE(JOB_ID
+            , 'AD_PRES', 'AP'
+            , 'AD_VP', 'AV'
+            , 'IT_PROG', 'IP'
+            , 'FI_MGR', 'FM'
+            , 'FI_ACCOUNT', 'FA'
+            , 'PU_MAN', 'PM'
+            , '-') AS MIN_JOB_ID
+  FROM EMPLOYEES
+;
 
-
+-- JOB_ID 의 자리수가 4라면 'FOUR'
+--                 5라면 'FIVE'
+--                 6이라면 'SIX'
+--                 그 외 '-'
+SELECT JOB_ID
+     , LENGTH(JOB_ID)
+     , DECODE(LENGTH(JOB_ID)
+            , 4, 'FOUR'
+            , 5, 'FIVE'
+            , 6, 'SIX'
+            , '-') LEN
+  FROM EMPLOYEES
+;
 
 -- 8. CASE
+-- AD_PRES -> AP
+-- AD_VP -> AV
+-- IT_PROG -> IP
+-- FI_MGR -> FM
+-- FI_ACCOUNT -> FA
+-- PU_MAN -> PM
+-- 다 아니면 '-'
+-- 으로 변환하여 조회
+-- JOB_ID, MIN_JOB_ID
+SELECT JOB_ID
+     , CASE JOB_ID
+          WHEN 'AD_PRES' THEN 
+             'AP'
+          WHEN 'AD_VP' THEN 
+             'AV'
+          WHEN 'IT_PROG' THEN 
+             'IP'
+          WHEN 'FI_MGR' THEN 
+             'FM'
+          ELSE
+             '-'
+        END MIN_JOB_ID
+  FROM EMPLOYEES
+;
+
 -- 연봉이 평균연봉보다 많이 받으면 "고액연봉"
 -- 연봉이 평균연봉보다 적게 받으면 "저연봉"
 -- 둘 다 아니면, "평균연봉"
 -- 으로 조회
+SELECT AVG(SALARY)
+  FROM EMPLOYEES
+;
+
+SELECT SALARY
+     , CASE 
+	     WHEN SALARY >= (SELECT AVG(SALARY)
+	                       FROM EMPLOYEES) THEN
+	     	'고액연봉'
+	     WHEN SALARY < (SELECT AVG(SALARY)
+                          FROM EMPLOYEES) THEN
+	     	'저연봉'
+	     ELSE
+	     	'평균연봉'
+	   END SALARY_TYPE
+  FROM EMPLOYEES
+;
 
 -- 9. NVL
--- 상사가 없는 경우 "-" 로 출력
-
-
+-- 상사가 없는 경우 '-' 로 출력
+-- NVL
+SELECT EMPLOYEE_ID
+     , MANAGER_ID
+     , NVL(MANAGER_ID, -1)
+     , NVL(TO_CHAR(MANAGER_ID), '-')
+  FROM EMPLOYEES
+;
+-- CASE
+SELECT EMPLOYEE_ID
+     , MANAGER_ID
+     , CASE 
+     	WHEN MANAGER_ID IS NULL THEN
+--     		-1
+     		'-'
+     	ELSE
+--     		MANAGER_ID
+     		TO_CHAR(MANAGER_ID)
+       END NVL_MANAGER_ID
+  FROM EMPLOYEES
+;
                             
 -- 10. LPAD
 -- 11. RPAD
