@@ -193,7 +193,7 @@ SELECT SALARY
 	                       FROM EMPLOYEES) THEN
 	     	'고액연봉'
 	     WHEN SALARY < (SELECT AVG(SALARY)
-                          FROM EMPLOYEES) THEN
+                              FROM EMPLOYEES) THEN
 	     	'저연봉'
 	     ELSE
 	     	'평균연봉'
@@ -225,13 +225,89 @@ SELECT EMPLOYEE_ID
 ;
                             
 -- 10. LPAD
+SELECT LPAD(EMPLOYEE_ID, 10, 'B')
+  FROM EMPLOYEES
+;
 -- 11. RPAD
+SELECT RPAD(EMPLOYEE_ID, 10, 'A')
+  FROM EMPLOYEES
+;
 -- 12. TO_CHAR
+SELECT HIRE_DATE
+     , TO_CHAR(HIRE_DATE)
+     , TO_CHAR(HIRE_DATE, 'YYYY/MM/DD HH:MI:SS')
+     , TO_CHAR(HIRE_DATE, 'YYYY-MM-DD HH24:MI:SS')
+     , TO_CHAR(HIRE_DATE, 'YYYY-MM-DD')
+     , TO_CHAR(HIRE_DATE, 'HH24')
+  FROM EMPLOYEES
+;
 -- 13. TO_DATE
+SELECT '20230220162457'
+     , TO_DATE('20230220162457', 'YYYY-MM-DD HH24:MI:SS')
+  FROM DUAL
+;
+
+SELECT *
+  FROM DUAL 
+;
+
 -- 14. SUBSTR
--- 15. LEN
+SELECT FIRST_NAME
+     , SUBSTR(FIRST_NAME, 1, 2)
+     , SUBSTR(FIRST_NAME, 3, 2)
+     , SUBSTR(FIRST_NAME, 5, 2)
+     , SUBSTR(FIRST_NAME, 7, 2)
+  FROM EMPLOYEES
+;
+
+-- 15. LENGTH
+SELECT FIRST_NAME
+     , LENGTH(FIRST_NAME)
+  FROM EMPLOYEES
+;
+
 -- 16. LTRIM
+SELECT '  ABC  '
+     , LTRIM('  ABC  ')
+  FROM DUAL
+;
 -- 17. RTRIM
+SELECT '  ABC  '
+     , RTRIM('  ABC  ')
+  FROM DUAL
+;
 -- 18. TRIM
+SELECT '  ABC  '
+     , TRIM('  ABC  ')
+  FROM DUAL
+;
+
 -- 19. ADD_MONTHS
+SELECT ADD_MONTHS(SYSDATE, 1) "한달 후"
+     , ADD_MONTHS(SYSDATE, 2) "두달 후"
+     , ADD_MONTHS(SYSDATE, -1) "한달 전"
+     , ADD_MONTHS(SYSDATE, -2) "두달 전"
+     , ADD_MONTHS(SYSDATE, -12) "1년 전"
+     , ADD_MONTHS(SYSDATE, 12) "1년 후"
+  FROM DUAL
+;
+
 -- 20. SYSDATE
+SELECT SYSDATE "현재날짜"
+     , SYSDATE - 1 "하루 전"
+     , SYSDATE - 2 "이틀 전"
+     , SYSDATE + 1 "하루 후"
+     , SYSDATE + 2 "이틀 후"
+     , SYSDATE - (1/24/60) "1분 전"
+     , SYSDATE - (5/24/60) "5분 전"
+     , SYSDATE - (1/24) "1시간 전"
+     , SYSDATE - (5/24) "5시간 전"
+  FROM DUAL
+;
+
+-- 입사일자에서 하루 씩 뺀 날짜를 조회
+SELECT HIRE_DATE
+     , HIRE_DATE - 1 YESTERDAY
+  FROM EMPLOYEES
+
+
