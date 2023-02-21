@@ -472,9 +472,47 @@ SELECT EMP.FIRST_NAME
        ON LOC.LOCATION_ID = DEPT.LOCATION_ID
     WHERE LOC.CITY != 'Seattle'
 ;
--- 54. 근무중인 사원이 가장 많은 도시와 사원의 수를 조회한다.
+-- 54. 근무중인 사원이 가장 많은 도시와 사원의 수를 조회한다.  
+SELECT CITY    
+     , CNT 
+  FROM (SELECT CITY
+               , CNT
+          FROM (SELECT COUNT(1) CNT 
+                     , LOC.CITY
+                  FROM EMPLOYEES EMP
+                  JOIN DEPARTMENTS DEP 
+                    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
+                  JOIN LOCATIONS LOC
+                    ON DEP.LOCATION_ID = LOC.LOCATION_ID 
+                 GROUP BY LOC.CITY)
+          ORDER BY CNT DESC)
+ WHERE ROWNUM =1
+;  
 -- 55. 근무중인 사원이 없는 도시를 조회한다.
+SELECT CITY 
+  FROM LOCATIONS 
+ WHERE LOCATION_ID NOT IN (SELECT DEP.LOCATION_ID 
+                             FROM EMPLOYEES EMP
+                               INNER JOIN DEPARTMENTS DEP 
+                               ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID )
+
 -- 56. 연봉이 7000 에서 12000 사이인 사원이 근무중인 도시를 조회한다.
+    SELECT LOC.CITY 
+      FROM EMPLOYEES EMP
+     INNER JOIN DEPARTMENTS DEP
+        ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
+     INNER JOIN LOCATIONS LOC 
+        ON DEP.LOCATION_ID = LOC.LOCATION_ID 
+     WHERE EMP.SALARY BETWEEN 7000 AND 12000
+     ;
+    SELECT LOC.CITY
+      FROM LOCATIONS LOC
+     WHERE LOC.LOCATION_ID IN (SELECT DISTINCT DEP.LOCATION_ID
+                                 FROM DEPARTMENTS DEP
+                                WHERE DEP.DEPARTMENT_ID IN (SELECT DISTINCT DEPARTMENT_ID
+                                                              FROM EMPLOYEES
+                                                             WHERE SALARY BETWEEN 7000 AND 12000))
+;
 -- 57. 'Seattle' 에서 근무중인 사원의 직무명을 중복없이 조회한다.
 -- 58. 사내의 최고연봉과 최저연봉의 차이를 조회한다.
 -- 59. 이름이 'Renske' 인 사원의 연봉과 같은 연봉을 받는 사원의 모든 정보를 조회한다. 단, 'Renske' 사원은 조회에서 제외한다.
