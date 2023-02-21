@@ -361,8 +361,8 @@ SELECT DISTINCT EMP.MANAGER_ID
 ;
 -- 44. 50번 부서의 부서장의 이름, 성, 연봉을 조회한다.
 SELECT FIRST_NAME 
-	 , LAST_NAME 
-	 , SALARY 
+     , LAST_NAME 
+     , SALARY 
   FROM EMPLOYEES EMP
  INNER JOIN DEPARTMENTS DEP 
     ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
@@ -370,12 +370,12 @@ SELECT FIRST_NAME
    AND EMP.EMPLOYEE_ID = DEP.MANAGER_ID
 
 SELECT FIRST_NAME 
-	 , LAST_NAME 
-	 , SALARY 
+     , LAST_NAME 
+     , SALARY 
   FROM EMPLOYEES
  WHERE EMPLOYEE_ID = (SELECT MANAGER_ID
- 						FROM DEPARTMENTS
- 					   WHERE DEPARTMENT_ID  = 50)
+                         FROM DEPARTMENTS
+                        WHERE DEPARTMENT_ID  = 50)
 ;
 -- 45. 부서명별 사원의 수를 조회한다.
 SELECT DEPT.DEPARTMENT_NAME
@@ -401,14 +401,77 @@ SELECT DEP.DEPARTMENT_NAME
               WHERE ROWNUM = 1) EMP
     ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID
 ;
-
 -- 47. 사원이 없는 부서명을 조회한다.
+SELECT DEPARTMENT_NAME 
+  FROM DEPARTMENTS
+ WHERE DEPARTMENT_ID NOT IN (SELECT DISTINCT DEPARTMENT_ID
+                               FROM EMPLOYEES
+                              WHERE DEPARTMENT_ID IS NOT NULL)
+;
 -- 48. 직무가 변경된 사원의 모든 정보를 조회한다.
+SELECT *
+  FROM EMPLOYEES
+ WHERE EMPLOYEE_ID IN (SELECT EMPLOYEE_ID 
+                             FROM JOB_HISTORY)
+;
 -- 49. 직무가 변경된적 없는 사원의 모든 정보를 조회한다.
+SELECT *
+  FROM EMPLOYEES
+ WHERE EMPLOYEE_ID NOT IN (SELECT EMPLOYEE_ID
+                              FROM JOB_HISTORY)
+;
 -- 50. 직무가 변경된 사원의 과거 직무명과 현재 직무명을 조회한다.
+SELECT PAST_JOB.JOB_TITLE 
+     , JOB.JOB_TITLE 
+  FROM EMPLOYEES EMP
+ INNER JOIN JOBS JOB -- 현재 직무명
+    ON EMP.JOB_ID = JOB.JOB_ID 
+ INNER JOIN JOB_HISTORY JH-- 과거의 직무 ID
+    ON EMP.EMPLOYEE_ID = JH.EMPLOYEE_ID 
+ INNER JOIN JOBS PAST_JOB -- 과거 직무명
+    ON JH.JOB_ID = PAST_JOB.JOB_ID 
+ ;
 -- 51. 직무가 가장 많이 변경된 부서의 이름을 조회한다.
+SELECT DEP.DEPARTMENT_NAME
+     , JH.CNT
+  FROM (SELECT DEPARTMENT_ID 
+             , CNT
+          FROM (SELECT DEPARTMENT_ID 
+                       , CNT
+                  FROM (SELECT DEPARTMENT_ID
+                             , COUNT(1) CNT
+                          FROM JOB_HISTORY
+                         GROUP BY DEPARTMENT_ID)
+                 ORDER BY CNT DESC)
+         WHERE ROWNUM = 1) JH
+ INNER JOIN DEPARTMENTS DEP
+    ON JH.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+;                
 -- 52. 'Seattle' 에서 근무중인 사원의 이름, 성, 연봉, 부서명 을 조회한다.
+SELECT EMP.FIRST_NAME
+     , EMP.LAST_NAME
+     , EMP.SALARY
+     , DEP.DEPARTMENT_NAME
+  FROM EMPLOYEES EMP
+ INNER JOIN DEPARTMENTS DEP
+     ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+ INNER JOIN LOCATIONS LOC
+     ON LOC.LOCATION_ID  = DEP.LOCATION_ID
+ WHERE LOC.CITY = 'Seattle'
+;
 -- 53. 'Seattle' 에서 근무하지 않는 모든 사원의 이름, 성, 연봉, 부서명, 도시를 조회한다.
+   SELECT EMP.FIRST_NAME
+        , EMP.LAST_NAME
+        , EMP.SALARY
+        , DEPT.DEPARTMENT_NAME
+        , LOC.CITY 
+     FROM EMPLOYEES EMP
+    INNER JOIN DEPARTMENTS DEPT
+       ON EMP.DEPARTMENT_ID = DEPT.DEPARTMENT_ID 
+    INNER JOIN LOCATIONS LOC
+       ON LOC.LOCATION_ID = DEPT.LOCATION_ID
+    WHERE LOC.CITY != 'Seattle'
+;
 -- 54. 근무중인 사원이 가장 많은 도시와 사원의 수를 조회한다.
 -- 55. 근무중인 사원이 없는 도시를 조회한다.
 -- 56. 연봉이 7000 에서 12000 사이인 사원이 근무중인 도시를 조회한다.
