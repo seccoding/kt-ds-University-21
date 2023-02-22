@@ -1,21 +1,21 @@
--- EXISTS (데이터가 존재한다.)
+-- EXISTS (데이터가   존재한다.)
 -- 사원이 있는 부서를 조회한다.
 SELECT *
   FROM DEPARTMENTS DEP
  WHERE EXISTS (SELECT 1
-        FROM EMPLOYEES EMP
-       WHERE EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID) 
+                 FROM EMPLOYEES EMP
+                WHERE EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID) 
 ;
 
 -- 사원이 있는 도시를 조회한다. (EXISTS 두번)
 SELECT *
   FROM LOCATIONS LOC
  WHERE EXISTS (SELECT 1
-        FROM DEPARTMENTS DEP
-       WHERE LOC.LOCATION_ID = DEP.LOCATION_ID
-         AND EXISTS (SELECT 1
-              FROM EMPLOYEES EMP
-             WHERE EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID))
+                 FROM DEPARTMENTS DEP
+                WHERE LOC.LOCATION_ID = DEP.LOCATION_ID
+                  AND EXISTS (SELECT 1
+                                FROM EMPLOYEES EMP
+                               WHERE EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID))
 ;
 
 -- NOT EXISTS (데이터가 존재하지 않는다.)
@@ -23,19 +23,19 @@ SELECT *
 SELECT *
   FROM DEPARTMENTS DEP
  WHERE NOT EXISTS (SELECT 1
-            FROM EMPLOYEES EMP
-           WHERE EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID) 
+                     FROM EMPLOYEES EMP
+                    WHERE EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID) 
 ;
 
 -- 사원이 없는 도시를 조회한다. (EXISTS 두번)
 SELECT *
   FROM LOCATIONS LOC
  WHERE NOT EXISTS (SELECT 1
-            FROM DEPARTMENTS DEP
-           WHERE LOC.LOCATION_ID = DEP.LOCATION_ID
-             AND EXISTS (SELECT 1
-                  FROM EMPLOYEES EMP
-                 WHERE EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID))
+                     FROM DEPARTMENTS DEP
+                    WHERE LOC.LOCATION_ID = DEP.LOCATION_ID
+                      AND EXISTS (SELECT 1
+                                    FROM EMPLOYEES EMP
+                                   WHERE EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID))
 ;
 
 -- 부서가 없는 국가를 조회한다.
@@ -43,18 +43,18 @@ SELECT *
 SELECT 1
   FROM LOCATIONS LOC
  WHERE EXISTS (SELECT 1
-        FROM DEPARTMENTS DEP
-       WHERE LOC.LOCATION_ID = DEP.LOCATION_ID)
+                 FROM DEPARTMENTS DEP
+                WHERE LOC.LOCATION_ID = DEP.LOCATION_ID)
 ;
 -- 2. 부서가 없는 국가 조회
 SELECT *
   FROM COUNTRIES COU
  WHERE NOT EXISTS (SELECT 1
-            FROM LOCATIONS LOC
-           WHERE COU.COUNTRY_ID = LOC.COUNTRY_ID 
-             AND EXISTS (SELECT 1
-                  FROM DEPARTMENTS DEP
-                 WHERE LOC.LOCATION_ID = DEP.LOCATION_ID))
+                     FROM LOCATIONS LOC
+                    WHERE COU.COUNTRY_ID = LOC.COUNTRY_ID 
+                      AND EXISTS (SELECT 1
+                                    FROM DEPARTMENTS DEP
+                                   WHERE LOC.LOCATION_ID = DEP.LOCATION_ID))
  ORDER BY COUNTRY_ID ASC
 ;
 -- IN (관련된 데이터가 있다.)
@@ -62,24 +62,24 @@ SELECT *
 SELECT *
   FROM EMPLOYEES
  WHERE DEPARTMENT_ID IN (SELECT DEPARTMENT_ID
-         FROM DEPARTMENTS
-        WHERE DEPARTMENT_NAME LIKE '%I%'
-           OR DEPARTMENT_NAME LIKE '%i%')
+                           FROM DEPARTMENTS
+                          WHERE DEPARTMENT_NAME LIKE '%I%'
+                             OR DEPARTMENT_NAME LIKE '%i%')
 ;
 -- 사원이 있는 부서를 조회한다.
 SELECT *
   FROM DEPARTMENTS DEP
  WHERE DEP.DEPARTMENT_ID IN (SELECT DISTINCT EMP.DEPARTMENT_ID 
-             FROM EMPLOYEES EMP) 
+                               FROM EMPLOYEES EMP) 
 ;
 
 -- 사원이 있는 도시를 조회한다
 SELECT *
   FROM LOCATIONS LOC
  WHERE LOC.LOCATION_ID IN (SELECT DISTINCT DEP.LOCATION_ID 
-           FROM DEPARTMENTS DEP
-          WHERE DEP.DEPARTMENT_ID IN (SELECT DISTINCT EMP.DEPARTMENT_ID 
-                      FROM EMPLOYEES EMP))
+                             FROM DEPARTMENTS DEP
+                            WHERE DEP.DEPARTMENT_ID IN (SELECT DISTINCT EMP.DEPARTMENT_ID 
+                                                          FROM EMPLOYEES EMP))
 ;
 
 -- NOT IN (관련된 데이터가 없다.)
@@ -87,16 +87,16 @@ SELECT *
 SELECT *
   FROM DEPARTMENTS DEP
  WHERE DEP.DEPARTMENT_ID NOT IN (SELECT DISTINCT EMP.DEPARTMENT_ID 
-                 FROM EMPLOYEES EMP
-                WHERE DEPARTMENT_ID IS NOT NULL) 
+                                   FROM EMPLOYEES EMP
+                                  WHERE DEPARTMENT_ID IS NOT NULL) 
 ;
 -- 사원이 없는 도시를 조회한다
 SELECT *
   FROM LOCATIONS LOC
  WHERE LOC.LOCATION_ID NOT IN (SELECT DISTINCT DEP.LOCATION_ID 
-               FROM DEPARTMENTS DEP
-              WHERE DEP.DEPARTMENT_ID IN (SELECT DISTINCT EMP.DEPARTMENT_ID 
-                          FROM EMPLOYEES EMP))
+                                 FROM DEPARTMENTS DEP
+                                WHERE DEP.DEPARTMENT_ID IN (SELECT DISTINCT EMP.DEPARTMENT_ID 
+                                                              FROM EMPLOYEES EMP))
 ;
 
 -- 1. 현재 시간을 조회한다.
@@ -208,12 +208,12 @@ SELECT *
 ;
 -- 24. 평균 연봉보다 많이 받는 사원들의 사원번호, 이름, 성, 연봉을 조회한다.
           SELECT EMPLOYEE_ID 
-      , LAST_NAME 
-      , FIRST_NAME 
-      , SALARY 
-            FROM EMPLOYEES 
-           WHERE SALARY >= (SELECT AVG(SALARY)
-               FROM EMPLOYEES )
+               , LAST_NAME 
+               , FIRST_NAME 
+               , SALARY 
+             FROM EMPLOYEES 
+            WHERE SALARY >= (SELECT AVG(SALARY)
+                               FROM EMPLOYEES )
 ;
          
            
@@ -223,7 +223,7 @@ SELECT EMPLOYEE_ID
      , DEPARTMENT_ID 
   FROM EMPLOYEES 
  WHERE SALARY < (SELECT AVG(SALARY)
-           FROM EMPLOYEES)
+                   FROM EMPLOYEES)
 ;           
 -- 26. 가장 많은 연봉을 받는 사원의 사원번호, 이름, 연봉을 조회한다.
 SELECT EMP.EMPLOYEE_ID 
@@ -231,7 +231,7 @@ SELECT EMP.EMPLOYEE_ID
      , EMP.SALARY 
   FROM EMPLOYEES EMP
  WHERE SALARY = (SELECT MAX(SALARY)
-          FROM EMPLOYEES)
+                   FROM EMPLOYEES)
 ;          
 -- 27. 이름이 4글자인 사원의 모든 정보를 조회한다.
 SELECT *
@@ -258,7 +258,7 @@ SELECT *
 SELECT *
   FROM EMPLOYEES
  WHERE HIRE_DATE = (SELECT MIN(HIRE_DATE)
-              FROM EMPLOYEES)
+                      FROM EMPLOYEES)
 ;
 -- 32. 자신의 상사보다 더 많은 연봉을 받는 사원의 모든 정보를 조회한다.
     SELECT *
@@ -270,15 +270,15 @@ SELECT *
 SELECT *
   FROM EMPLOYEES EMP
  WHERE SALARY > (SELECT SALARY
-           FROM EMPLOYEES MGN
-          WHERE MGN.EMPLOYEE_ID = EMP.MANAGER_ID)
+                   FROM EMPLOYEES MGN
+                  WHERE MGN.EMPLOYEE_ID = EMP.MANAGER_ID)
 ;
 -- 33. 자신의 상사보다 더 일찍 입사한 사원의 모든 정보를 조회한다.
 SELECT *
   FROM EMPLOYEES EMP
  WHERE HIRE_DATE < (SELECT HIRE_DATE
-              FROM EMPLOYEES MAN
-             WHERE EMP.MANAGER_ID = MAN.EMPLOYEE_ID)
+                      FROM EMPLOYEES MAN
+                     WHERE EMP.MANAGER_ID = MAN.EMPLOYEE_ID)
 ;
 -- 34. 부서아이디별 평균 연봉을 조회한다.
 SELECT DEPARTMENT_ID 
@@ -298,13 +298,13 @@ SELECT JOB_ID
 SELECT *
   FROM EMPLOYEES
  WHERE COMMISSION_PCT = (SELECT MAX(COMMISSION_PCT)
-          FROM EMPLOYEES)
+                           FROM EMPLOYEES)
 ;
 -- 37. 가장 적은 인센티브를 받는 사원의 연봉과 인센티브를 조회한다.
 SELECT *
   FROM EMPLOYEES
  WHERE COMMISSION_PCT = (SELECT MIN(COMMISSION_PCT)
-          FROM EMPLOYEES)
+                           FROM EMPLOYEES)
 ;          
 -- 38. 직무아이디별 사원의 수를 조회한다.
 SELECT JOB.JOB_ID 
@@ -330,8 +330,8 @@ SELECT COUNT(EMPLOYEE_ID)
 SELECT *
   FROM EMPLOYEES E1
  WHERE SALARY  < (SELECT AVG(SALARY)
-           FROM EMPLOYEES E2
-          WHERE E1.DEPARTMENT_ID = E2.DEPARTMENT_ID)
+                    FROM EMPLOYEES E2
+                   WHERE E1.DEPARTMENT_ID = E2.DEPARTMENT_ID)
  ;
 
 -- 41. 사원이 근무하는 부서명, 이름, 성을 조회한다.
@@ -352,7 +352,7 @@ SELECT EMP.FIRST_NAME
  INNER JOIN DEPARTMENTS DEP
     ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
  WHERE SALARY = (SELECT MIN(SALARY)
-          FROM EMPLOYEES EMP)
+                   FROM EMPLOYEES EMP)
          
 ; 
 -- 43. 상사사원번호를 중복없이 조회한다.
@@ -374,8 +374,8 @@ SELECT FIRST_NAME
      , SALARY 
   FROM EMPLOYEES
  WHERE EMPLOYEE_ID = (SELECT MANAGER_ID
-                FROM DEPARTMENTS
-               WHERE DEPARTMENT_ID  = 50)
+                        FROM DEPARTMENTS
+                       WHERE DEPARTMENT_ID  = 50)
 ;
 -- 45. 부서명별 사원의 수를 조회한다.
 SELECT DEPT.DEPARTMENT_NAME
@@ -390,35 +390,35 @@ SELECT DEP.DEPARTMENT_NAME
      , EMP.CNT
   FROM DEPARTMENTS DEP
  INNER JOIN (SELECT DEPARTMENT_ID
-         , CNT
-      FROM (SELECT DEPARTMENT_ID
-        , CNT
-              FROM (SELECT DEPARTMENT_ID 
-                , COUNT(1) CNT
-             FROM EMPLOYEES
-            GROUP BY DEPARTMENT_ID)
-             ORDER BY CNT DESC)
-     WHERE ROWNUM = 1) EMP
+                  , CNT
+               FROM (SELECT DEPARTMENT_ID
+                          , CNT
+                       FROM (SELECT DEPARTMENT_ID 
+                                  , COUNT(1) CNT
+                               FROM EMPLOYEES
+                              GROUP BY DEPARTMENT_ID)
+                      ORDER BY CNT DESC)
+              WHERE ROWNUM = 1) EMP
     ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID
 ;
 -- 47. 사원이 없는 부서명을 조회한다.
 SELECT DEPARTMENT_NAME 
   FROM DEPARTMENTS
  WHERE DEPARTMENT_ID NOT IN (SELECT DISTINCT DEPARTMENT_ID
-             FROM EMPLOYEES
-            WHERE DEPARTMENT_ID IS NOT NULL)
+                               FROM EMPLOYEES
+                              WHERE DEPARTMENT_ID IS NOT NULL)
 ;
 -- 48. 직무가 변경된 사원의 모든 정보를 조회한다.
 SELECT *
   FROM EMPLOYEES
  WHERE EMPLOYEE_ID IN (SELECT EMPLOYEE_ID 
-           FROM JOB_HISTORY)
+                         FROM JOB_HISTORY)
 ;
 -- 49. 직무가 변경된적 없는 사원의 모든 정보를 조회한다.
 SELECT *
   FROM EMPLOYEES
  WHERE EMPLOYEE_ID NOT IN (SELECT EMPLOYEE_ID
-            FROM JOB_HISTORY)
+                             FROM JOB_HISTORY)
 ;
 -- 50. 직무가 변경된 사원의 과거 직무명과 현재 직무명을 조회한다.
 SELECT PAST_JOB.JOB_TITLE 
@@ -435,14 +435,14 @@ SELECT PAST_JOB.JOB_TITLE
 SELECT DEP.DEPARTMENT_NAME
      , JH.CNT
   FROM (SELECT DEPARTMENT_ID 
-    , CNT
+             , CNT
           FROM (SELECT DEPARTMENT_ID 
-              , CNT
-         FROM (SELECT DEPARTMENT_ID
-           , COUNT(1) CNT
-        FROM JOB_HISTORY
-                GROUP BY DEPARTMENT_ID)
-        ORDER BY CNT DESC)
+                     , CNT
+                  FROM (SELECT DEPARTMENT_ID
+                             , COUNT(1) CNT
+                          FROM JOB_HISTORY
+                         GROUP BY DEPARTMENT_ID)
+                 ORDER BY CNT DESC)
          WHERE ROWNUM = 1) JH
  INNER JOIN DEPARTMENTS DEP
     ON JH.DEPARTMENT_ID = DEP.DEPARTMENT_ID
@@ -476,25 +476,25 @@ SELECT EMP.FIRST_NAME
 SELECT CITY    
      , CNT 
   FROM (SELECT CITY
-      , CNT
+             , CNT
           FROM (SELECT COUNT(1) CNT 
-            , LOC.CITY
-         FROM EMPLOYEES EMP
-         JOIN DEPARTMENTS DEP 
-           ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
-         JOIN LOCATIONS LOC
-           ON DEP.LOCATION_ID = LOC.LOCATION_ID 
-        GROUP BY LOC.CITY)
-          ORDER BY CNT DESC)
+                     , LOC.CITY
+                  FROM EMPLOYEES EMP
+                  JOIN DEPARTMENTS DEP 
+                    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
+                  JOIN LOCATIONS LOC
+                    ON DEP.LOCATION_ID = LOC.LOCATION_ID 
+                 GROUP BY LOC.CITY)
+         ORDER BY CNT DESC)
  WHERE ROWNUM =1
 ;  
 -- 55. 근무중인 사원이 없는 도시를 조회한다.
 SELECT CITY 
   FROM LOCATIONS 
  WHERE LOCATION_ID NOT IN (SELECT DEP.LOCATION_ID 
-           FROM EMPLOYEES EMP
-             INNER JOIN DEPARTMENTS DEP 
-             ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID )
+                            FROM EMPLOYEES EMP
+                           INNER JOIN DEPARTMENTS DEP 
+                              ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID)
 
 -- 56. 연봉이 7000 에서 12000 사이인 사원이 근무중인 도시를 조회한다.
     SELECT LOC.CITY 
@@ -508,20 +508,21 @@ SELECT CITY
     SELECT LOC.CITY
       FROM LOCATIONS LOC
      WHERE LOC.LOCATION_ID IN (SELECT DISTINCT DEP.LOCATION_ID
-               FROM DEPARTMENTS DEP
-              WHERE DEP.DEPARTMENT_ID IN (SELECT DISTINCT DEPARTMENT_ID
-                          FROM EMPLOYEES
-                         WHERE SALARY BETWEEN 7000 AND 12000))
+                                 FROM DEPARTMENTS DEP
+                                WHERE DEP.DEPARTMENT_ID IN (SELECT DISTINCT DEPARTMENT_ID
+                                                              FROM EMPLOYEES
+                                                             WHERE SALARY BETWEEN 7000 AND 12000))
 ;
 -- 57. 'Seattle' 에서 근무중인 사원의 직무명을 중복없이 조회한다.
 SELECT DISTINCT JOB.JOB_TITLE 
   FROM JOBS JOB
  WHERE JOB.JOB_ID IN (SELECT EMP.JOB_ID
-                FROM EMPLOYEES EMP
-               WHERE EMP.DEPARTMENT_ID IN (SELECT DEP.DEPARTMENT_ID
-                     FROM DEPARTMENTS DEP
-                    WHERE DEP.LOCATION_ID IN (SELECT LOCATION_ID                              FROM LOCATIONS
-                             WHERE CITY = 'Seattle')))
+                        FROM EMPLOYEES EMP
+                       WHERE EMP.DEPARTMENT_ID IN (SELECT DEP.DEPARTMENT_ID
+                                                     FROM DEPARTMENTS DEP
+                                                    WHERE DEP.LOCATION_ID IN (SELECT LOCATION_ID                              
+                                                                                FROM LOCATIONS
+                                                                               WHERE CITY = 'Seattle')))
 ;
 
 -- 58. 사내의 최고연봉과 최저연봉의 차이를 조회한다.
@@ -536,8 +537,8 @@ SELECT MAX(SALARY)-MIN(SALARY) "최고연봉-최저연봉"
 SELECT *
   FROM EMPLOYEES EMP 
  WHERE EMP.SALARY = (SELECT SALARY
-                FROM EMPLOYEES EMP
-              WHERE EMP.FIRST_NAME = 'Renske')
+                       FROM EMPLOYEES EMP
+                      WHERE EMP.FIRST_NAME = 'Renske')
 ;
  -- 60. 회사 전체의 평균 연봉보다 많이 받는 사원들 중 
 --     이름에 'u' 가 포함된 사원과 동일한 부서에서 근무중인 
@@ -545,16 +546,16 @@ SELECT *
 SELECT EMP.DEPARTMENT_ID 
   FROM EMPLOYEES EMP
  WHERE EMP.SALARY >= (SELECT AVG(EMP.SALARY) 
-                FROM EMPLOYEES)
+                        FROM EMPLOYEES)
    AND EMP.FIRST_NAME LIKE '%u%'
 ;
 SELECT *
   FROM EMPLOYEES EMP
  WHERE EMP.DEPARTMENT_ID IN (SELECT EMP.DEPARTMENT_ID 
-               FROM EMPLOYEES EMP
-             WHERE EMP.SALARY >= (SELECT AVG(EMP.SALARY) 
-                  FROM EMPLOYEES EMP)
-                 AND EMP.FIRST_NAME LIKE '%u%')    
+                               FROM EMPLOYEES EMP
+                              WHERE EMP.SALARY >= (SELECT AVG(EMP.SALARY) 
+                                                     FROM EMPLOYEES EMP)
+                                AND EMP.FIRST_NAME LIKE '%u%')
 ;                
                  
 -- 61. 부서가 없는 국가명을 조회한다.
@@ -574,9 +575,9 @@ SELECT DISTINCT COUN.COUNTRY_ID
 SELECT COU.COUNTRY_ID 
   FROM COUNTRIES COU
   LEFT OUTER JOIN (SELECT LOC.COUNTRY_ID
-            FROM LOCATIONS LOC
-           INNER JOIN DEPARTMENTS DEP
-              ON LOC.LOCATION_ID = DEP.LOCATION_ID) LOC
+                     FROM LOCATIONS LOC
+                    INNER JOIN DEPARTMENTS DEP
+                       ON LOC.LOCATION_ID = DEP.LOCATION_ID) LOC
     ON COU.COUNTRY_ID = LOC.COUNTRY_ID
  WHERE LOC.COUNTRY_ID IS NULL
  ORDER BY COU.COUNTRY_ID 
@@ -586,42 +587,42 @@ SELECT COU.COUNTRY_ID
 SELECT *
   FROM COUNTRIES
  WHERE COUNTRY_ID NOT IN (SELECT COUNTRY_ID
-          FROM LOCATIONS 
-         WHERE LOCATION_ID IN (SELECT LOCATION_ID
-                        FROM DEPARTMENTS))
+                            FROM LOCATIONS 
+                           WHERE LOCATION_ID IN (SELECT LOCATION_ID
+                                                   FROM DEPARTMENTS))
  ORDER BY COUNTRY_ID 
 ;
 -- 62. 'Europe' 에서 근무중인 사원들의 모든 정보를 조회한다.
 SELECT *
   FROM EMPLOYEES EMP
  WHERE EMP.DEPARTMENT_ID IN (SELECT DEP.DEPARTMENT_ID 
-              FROM DEPARTMENTS DEP
-             WHERE DEP.LOCATION_ID IN (SELECT LOC.LOCATION_ID 
-                         FROM LOCATIONS LOC
-                        WHERE LOC.COUNTRY_ID IN (SELECT COU.COUNTRY_ID 
-                                  FROM COUNTRIES COU
-                                 WHERE COU.REGION_ID = (SELECT REG.REGION_ID 
-                                           FROM REGIONS REG
-                                          WHERE REG.REGION_NAME = 'Europe'))))
+                               FROM DEPARTMENTS DEP
+                              WHERE DEP.LOCATION_ID IN (SELECT LOC.LOCATION_ID 
+                                                          FROM LOCATIONS LOC
+                                                         WHERE LOC.COUNTRY_ID IN (SELECT COU.COUNTRY_ID 
+                                                                                    FROM COUNTRIES COU
+                                                                                   WHERE COU.REGION_ID = (SELECT REG.REGION_ID 
+                                                                                                            FROM REGIONS REG
+                                                                                                           WHERE REG.REGION_NAME = 'Europe'))))
 ;                                          
 -- 63. 'Europe' 에서 가장 많은 사원들이 있는 부서명을 조회한다.
 SELECT CNT_ORDER.DEPARTMENT_NAME 
      , CNT_ORDER.CNT
   FROM (SELECT DEP_CNT.DEPARTMENT_NAME 
-    , DEP_CNT.CNT
+             , DEP_CNT.CNT
           FROM (SELECT DEP.DEPARTMENT_NAME 
-            , COUNT(EMP.EMPLOYEE_ID) CNT
-         FROM EMPLOYEES EMP
-        INNER JOIN DEPARTMENTS DEP
-           ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
-        WHERE LOCATION_ID IN (SELECT LOCATION_ID 
-              FROM LOCATIONS
-             WHERE COUNTRY_ID IN (SELECT COUNTRY_ID 
-                           FROM COUNTRIES
-                          WHERE REGION_ID IN (SELECT REGION_ID 
-                                FROM REGIONS
-                             WHERE REGION_NAME = 'Europe')))
-        GROUP BY DEP.DEPARTMENT_NAME) DEP_CNT
+                     , COUNT(EMP.EMPLOYEE_ID) CNT
+                  FROM EMPLOYEES EMP
+                 INNER JOIN DEPARTMENTS DEP
+                    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
+                 WHERE LOCATION_ID IN (SELECT LOCATION_ID 
+                                         FROM LOCATIONS
+                                        WHERE COUNTRY_ID IN (SELECT COUNTRY_ID 
+                                                               FROM COUNTRIES
+                                                              WHERE REGION_ID IN (SELECT REGION_ID 
+                                                                                    FROM REGIONS
+                                                                                   WHERE REGION_NAME = 'Europe')))
+                 GROUP BY DEP.DEPARTMENT_NAME) DEP_CNT
          ORDER BY CNT DESC) CNT_ORDER
  WHERE ROWNUM = 1
 ;
@@ -674,9 +675,9 @@ CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID
        , LAST_NAME
        , MANAGER_ID
    FROM (SELECT EMPLOYEE_ID
-        , FIRST_NAME 
-      , LAST_NAME 
-      , MANAGER_ID 
+              , FIRST_NAME 
+              , LAST_NAME 
+              , MANAGER_ID 
            FROM EMPLOYEES 
           START WITH EMPLOYEE_ID = 114
         CONNECT BY PRIOR MANAGER_ID = EMPLOYEE_ID)
@@ -759,9 +760,9 @@ SELECT FIRST_NAME
      , DEPARTMENT_ID
      , CASE 
           WHEN COMMISSION_PCT IS NOT NULL THEN
-          'Y'
+             'Y'
           ELSE 
-          'N'    
+             'N'    
       END "인센티브여부"
   FROM EMPLOYEES
 ;
@@ -962,8 +963,36 @@ SELECT JB.JOB_TITLE
  GROUP BY JB.JOB_TITLE
 ;
 -- 94. 부서명별 최대연봉을 조회한다.
+SELECT D.DEPARTMENT_NAME
+     , NVL(MAX(E.SALARY),0) "최대연봉"
+  FROM DEPARTMENTS D
+  LEFT OUTER JOIN EMPLOYEES E
+    ON D.DEPARTMENT_ID = E.DEPARTMENT_ID
+ GROUP BY D.DEPARTMENT_NAME
+;
 -- 95. 직무명, 부서명 별 사원 수, 평균연봉을 조회한다.
+SELECT JOB.JOB_TITLE
+     , DEP.DEPARTMENT_NAME
+     , COUNT(EMP.EMPLOYEE_ID)
+     , AVG(EMP.SALARY)
+  FROM EMPLOYEES EMP
+ INNER JOIN JOBS JOB
+    ON EMP.JOB_ID = JOB.JOB_ID
+ INNER JOIN DEPARTMENTS DEP
+    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+ GROUP BY JOB.JOB_TITLE
+     , DEP.DEPARTMENT_NAME
+;
 -- 96. 도시별 사원 수를 조회한다.
+    SELECT LOC.CITY
+         , COUNT(EMP.EMPLOYEE_ID)
+      FROM EMPLOYEES EMP
+     INNER JOIN DEPARTMENTS DEP
+        ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+     INNER JOIN LOCATIONS LOC 
+        ON DEP.LOCATION_ID = LOC.LOCATION_ID
+     GROUP BY LOC.CITY  
+;
 -- 97. 국가별 사원 수, 최대연봉, 최소연봉을 조회한다.
 -- 98. 대륙별 사원 수를 대륙명으로 오름차순 정렬하여 조회한다.
 -- 99. 이름이나 성에 'A' 혹은 'a' 가 포함된 
