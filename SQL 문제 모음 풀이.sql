@@ -913,9 +913,54 @@ SELECT AVG_EMP.*
  ORDER BY AVG_EMP.AVG_SALARY DESC
  ;  
 -- 90. 이름의 첫 번째 글자별 평균연봉을 조회한다.
--- 91. 연도별 최소연봉을 조회한다.
--- 92. 월별 최대연봉 중 2번째 4번째 데이터만 조회한다.
+ SELECT FN 
+      , AVG(SALARY)
+   FROM (SELECT SUBSTR(FIRST_NAME, 1, 1) FN
+              , SALARY
+           FROM EMPLOYEES) 
+  GROUP BY FN
+;
+-- 91. 입사연도별 최소연봉을 조회한다.
+SELECT HIRE_DATE
+  FROM EMPLOYEES
+;
+
+SELECT TO_CHAR(HIRE_DATE, 'YYYY') EMP
+     , EMP.SALARY
+  FROM EMPLOYEES EMP
+;
+
+
+SELECT HIRE_YEAR
+     , MIN(SALARY) EMP_MIN_SALARY
+  FROM (SELECT TO_CHAR(HIRE_DATE, 'YYYY') HIRE_YEAR
+             , SALARY
+          FROM EMPLOYEES)
+ GROUP BY HIRE_YEAR
+;
+-- 92. 월별 최대연봉 중 2번째 부터 4번째 데이터만 조회한다.
+SELECT *
+  FROM (SELECT ROWNUM RNUM
+             , E.*
+          FROM (SELECT *
+                  FROM (SELECT HIRE_MONTH
+                             , MAX(SALARY) MAX_SALARY
+                          FROM (SELECT TO_CHAR(HIRE_DATE, 'MM') HIRE_MONTH
+                                     , SALARY
+                                  FROM EMPLOYEES)
+                         GROUP BY HIRE_MONTH) MONTH_SALARY
+                 ORDER BY MAX_SALARY DESC) E
+          WHERE ROWNUM <= 4)
+ WHERE RNUM >=2
+;
 -- 93. 직무명별 최소연봉을 조회한다.
+SELECT JB.JOB_TITLE
+     , MIN(EMP.SALARY)
+  FROM EMPLOYEES EMP
+ INNER JOIN JOBS JB
+    ON EMP.JOB_ID = JB.JOB_ID
+ GROUP BY JB.JOB_TITLE
+;
 -- 94. 부서명별 최대연봉을 조회한다.
 -- 95. 직무명, 부서명 별 사원 수, 평균연봉을 조회한다.
 -- 96. 도시별 사원 수를 조회한다.
