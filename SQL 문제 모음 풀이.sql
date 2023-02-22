@@ -721,25 +721,25 @@ SELECT EMP.FIRST_NAME
  ;
 -- 73. 부서명별 연봉의 합을 내림차순 정렬하여 조회한다.
 SELECT DEPS.DEPNAME
-	 , DEPS.DEPSUM 
+     , DEPS.DEPSUM 
   FROM (SELECT SUM(EMP.SALARY) DEPSUM
-  			 , DEP.DEPARTMENT_NAME DEPNAME
-		  FROM EMPLOYEES EMP
-		  JOIN DEPARTMENTS DEP
-		    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
-		 GROUP BY DEP.DEPARTMENT_NAME
-		 ) DEPS
+               , DEP.DEPARTMENT_NAME DEPNAME
+          FROM EMPLOYEES EMP
+          JOIN DEPARTMENTS DEP
+            ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+         GROUP BY DEP.DEPARTMENT_NAME
+         ) DEPS
   ORDER BY DEPS.DEPSUM DESC 
  ;
 -- 74. 직무명별 사원의 수를 오름차순 정렬하여 조회한다.
 SELECT CNT.JOBNAME
      , CNT.JOBCNT
   FROM (SELECT JOB.JOB_TITLE JOBNAME
-			 , COUNT(1) JOBCNT
-		  FROM EMPLOYEES EMP
-		  JOIN JOBS JOB
-		    ON EMP.JOB_ID = JOB.JOB_ID
-		 GROUP BY JOB.JOB_TITLE) CNT
+             , COUNT(1) JOBCNT
+          FROM EMPLOYEES EMP
+          JOIN JOBS JOB
+            ON EMP.JOB_ID = JOB.JOB_ID
+         GROUP BY JOB.JOB_TITLE) CNT
   ORDER BY CNT.JOBCNT 
  ;
 -- 75. 모든 사원들의 모든 정보를 조회한다. 
@@ -757,12 +757,12 @@ SELECT FIRST_NAME
      , COMMISSION_PCT
      , MANAGER_ID
      , DEPARTMENT_ID
-	 , CASE 
-		  WHEN COMMISSION_PCT IS NOT NULL THEN
-		  'Y'
-		  ELSE 
-		  'N'	
-	  END "인센티브여부"
+     , CASE 
+          WHEN COMMISSION_PCT IS NOT NULL THEN
+          'Y'
+          ELSE 
+          'N'    
+      END "인센티브여부"
   FROM EMPLOYEES
 ;
   
@@ -789,54 +789,78 @@ SELECT JOB.JOB_TITLE
 
 SELECT *
   FROM (SELECT JH.JOB_ID
-		     , TO_NUMBER(TO_CHAR(JH.START_DATE, 'YYYY')) START_YEAR
-		  FROM JOB_HISTORY JH) JH_2007
+             , TO_NUMBER(TO_CHAR(JH.START_DATE, 'YYYY')) START_YEAR
+          FROM JOB_HISTORY JH) JH_2007
  WHERE JH_2007.START_YEAR = 2007
-	  
+      
 ;
 -- 78. 직무별 최대연봉보다 더 많은 연봉을 받는 사원의 
 --     모든 정보를 조회한다.
-	SELECT *
-	  FROM JOBS JOB
-	 INNER JOIN EMPLOYEES EMP
-	    ON EMP.JOB_ID = JOB.JOB_ID
-	 WHERE EMP.SALARY > JOB.MAX_SALARY
-	  ;
+    SELECT *
+      FROM JOBS JOB
+     INNER JOIN EMPLOYEES EMP
+        ON EMP.JOB_ID = JOB.JOB_ID
+     WHERE EMP.SALARY > JOB.MAX_SALARY
+      ;
 -- 79. 사원들의 입사일자 중 이름, 성, 연도만 조회한다.
 SELECT FIRST_NAME
-	 , LAST_NAME
-	 , TO_CHAR(HIRE_DATE, 'YYYY') "입사년도"
+     , LAST_NAME
+     , TO_CHAR(HIRE_DATE, 'YYYY') "입사년도"
   FROM EMPLOYEES
 ;
 -- 80. 사원들의 입사일자 중 이름, 성, 연도, 월 만 조회한다.
 SELECT FIRST_NAME
-	 , LAST_NAME
-	 , TO_CHAR(HIRE_DATE, 'YYYY')"연도"
-	 , TO_CHAR(HIRE_DATE, 'MM')"월"
+     , LAST_NAME
+     , TO_CHAR(HIRE_DATE, 'YYYY')"연도"
+     , TO_CHAR(HIRE_DATE, 'MM')"월"
   FROM EMPLOYEES
 ;
 -- 81. 100번 사원의 모든 부하직원을 계층조회한다. 
 --     단, LEVEL이 4인 사원은 제외한다.
 SELECT *
   FROM (SELECT LEVEL L
-		     , E.*
-		  FROM EMPLOYEES E
-		 START WITH EMPLOYEE_ID = 100
-	   CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID)
+             , E.*
+          FROM EMPLOYEES E
+         START WITH EMPLOYEE_ID = 100
+       CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID)
  WHERE L != 4
 ;
 -- 82. 많은 연봉을 받는 10명을 조회한다.
 SELECT FIRST_NAME
-	 , SALARY
+     , SALARY
   FROM (SELECT FIRST_NAME
-  			 , SALARY
-  		  FROM EMPLOYEES
-  		 ORDER BY SALARY DESC)
+               , SALARY
+            FROM EMPLOYEES
+           ORDER BY SALARY DESC)
  WHERE ROWNUM <= 10
 ;
 -- 83. 가장 적은 연봉을 받는 사원의 상사명, 부서명을 조회한다.
-
+SELECT MAN.FIRST_NAME
+     , DEP.DEPARTMENT_NAME
+  FROM EMPLOYEES MAN --상사
+ INNER JOIN EMPLOYEES EMP --사원
+    ON EMP.MANAGER_ID = MAN.EMPLOYEE_ID
+ INNER JOIN DEPARTMENTS DEP
+    ON DEP.DEPARTMENT_ID = MAN.DEPARTMENT_ID
+ WHERE EMP.SALARY = (SELECT MIN(SALARY)
+                       FROM EMPLOYEES)
+;
 -- 84. 많은 연봉을 받는 사원 중 11번 째 부터 20번째를 조회한다.
+SELECT ROWNUM
+     , E.*
+  FROM EMPLOYEES E
+;
+
+SELECT *
+  FROM (SELECT ROWNUM RNUM
+             , E.*
+          FROM (SELECT *
+                  FROM EMPLOYEES
+                 ORDER BY SALARY DESC) E
+         WHERE ROWNUM <= 20)
+ WHERE RNUM >= 11
+;
+
 -- 85. 가장 적은 연봉을 받는 중 90번 째 부터 100번째를 조회한다.
 -- 86. 'PU_CLERK' 직무인 2번째 부터 5번째 사원의 부서명, 
 --     직무명을 조회한다.
@@ -945,17 +969,17 @@ SELECT FIRST_NAME
 --      사원번호로 내림차순 정렬된 사원의 사원번호, 이름 조회한다.
 /*조회 예
 --------------------
-100	Steven
-206	William
-205	Shelley
-204	Hermann
-203	Susan
-202	Pat
-201	Michael
-200	Jennifer
-199	Douglas
-198	Donald
-197	Kevin
-196	Alana
+100    Steven
+206    William
+205    Shelley
+204    Hermann
+203    Susan
+202    Pat
+201    Michael
+200    Jennifer
+199    Douglas
+198    Donald
+197    Kevin
+196    Alana
 ...
 */
