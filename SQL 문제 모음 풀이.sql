@@ -517,11 +517,11 @@ SELECT CITY
 SELECT DISTINCT JOB.JOB_TITLE 
   FROM JOBS JOB
  WHERE JOB.JOB_ID IN (SELECT EMP.JOB_ID
- 						FROM EMPLOYEES EMP
- 					   WHERE EMP.DEPARTMENT_ID IN (SELECT DEP.DEPARTMENT_ID
- 					   								 FROM DEPARTMENTS DEP
- 					   								WHERE DEP.LOCATION_ID IN (SELECT LOCATION_ID 					   															FROM LOCATIONS
- 					   														   WHERE CITY = 'Seattle')))
+                         FROM EMPLOYEES EMP
+                        WHERE EMP.DEPARTMENT_ID IN (SELECT DEP.DEPARTMENT_ID
+                                                         FROM DEPARTMENTS DEP
+                                                        WHERE DEP.LOCATION_ID IN (SELECT LOCATION_ID                                                                                    FROM LOCATIONS
+                                                                                   WHERE CITY = 'Seattle')))
 ;
 
 -- 58. 사내의 최고연봉과 최저연봉의 차이를 조회한다.
@@ -536,8 +536,8 @@ SELECT MAX(SALARY)-MIN(SALARY) "최고연봉-최저연봉"
 SELECT *
   FROM EMPLOYEES EMP 
  WHERE EMP.SALARY = (SELECT SALARY
-  					   FROM EMPLOYEES EMP
- 					  WHERE EMP.FIRST_NAME = 'Renske')
+                         FROM EMPLOYEES EMP
+                       WHERE EMP.FIRST_NAME = 'Renske')
 ;
  -- 60. 회사 전체의 평균 연봉보다 많이 받는 사원들 중 
 --     이름에 'u' 가 포함된 사원과 동일한 부서에서 근무중인 
@@ -545,18 +545,18 @@ SELECT *
 SELECT EMP.DEPARTMENT_ID 
   FROM EMPLOYEES EMP
  WHERE EMP.SALARY >= (SELECT AVG(EMP.SALARY) 
- 						FROM EMPLOYEES)
+                         FROM EMPLOYEES)
    AND EMP.FIRST_NAME LIKE '%u%'
 ;
 SELECT *
   FROM EMPLOYEES EMP
  WHERE EMP.DEPARTMENT_ID IN (SELECT EMP.DEPARTMENT_ID 
- 		 					   FROM EMPLOYEES EMP
- 							  WHERE EMP.SALARY >= (SELECT AVG(EMP.SALARY) 
- 													 FROM EMPLOYEES EMP)
-   							    AND EMP.FIRST_NAME LIKE '%u%')	
-;  							    
-   							    
+                                 FROM EMPLOYEES EMP
+                               WHERE EMP.SALARY >= (SELECT AVG(EMP.SALARY) 
+                                                      FROM EMPLOYEES EMP)
+                                   AND EMP.FIRST_NAME LIKE '%u%')    
+;                                  
+                                   
 -- 61. 부서가 없는 국가명을 조회한다.
 -- 일반 조인으로는 풀수가 없다.
 SELECT DISTINCT COUN.COUNTRY_ID 
@@ -590,39 +590,135 @@ SELECT *
                            WHERE LOCATION_ID IN (SELECT LOCATION_ID
                                                    FROM DEPARTMENTS))
  ORDER BY COUNTRY_ID 
+;
 -- 62. 'Europe' 에서 근무중인 사원들의 모든 정보를 조회한다.
+SELECT *
+  FROM EMPLOYEES EMP
+ WHERE EMP.DEPARTMENT_ID IN (SELECT DEP.DEPARTMENT_ID 
+                                FROM DEPARTMENTS DEP
+                               WHERE DEP.LOCATION_ID IN (SELECT LOC.LOCATION_ID 
+                                                             FROM LOCATIONS LOC
+                                                            WHERE LOC.COUNTRY_ID IN (SELECT COU.COUNTRY_ID 
+                                                                                        FROM COUNTRIES COU
+                                                                                       WHERE COU.REGION_ID = (SELECT REG.REGION_ID 
+                                                                                                                   FROM REGIONS REG
+                                                                                                                  WHERE REG.REGION_NAME = 'Europe'))))
+;                                                                                                                  
 -- 63. 'Europe' 에서 가장 많은 사원들이 있는 부서명을 조회한다.
+SELECT CNT_ORDER.DEPARTMENT_NAME 
+     , CNT_ORDER.CNT
+  FROM (SELECT DEP_CNT.DEPARTMENT_NAME 
+             , DEP_CNT.CNT
+          FROM (SELECT DEP.DEPARTMENT_NAME 
+                     , COUNT(EMP.EMPLOYEE_ID) CNT
+                  FROM EMPLOYEES EMP
+                 INNER JOIN DEPARTMENTS DEP
+                    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID 
+                 WHERE LOCATION_ID IN (SELECT LOCATION_ID 
+                                         FROM LOCATIONS
+                                        WHERE COUNTRY_ID IN (SELECT COUNTRY_ID 
+                                                               FROM COUNTRIES
+                                                              WHERE REGION_ID IN (SELECT REGION_ID 
+                                                                                      FROM REGIONS
+                                                                                   WHERE REGION_NAME = 'Europe')))
+                 GROUP BY DEP.DEPARTMENT_NAME) DEP_CNT
+         ORDER BY CNT DESC) CNT_ORDER
+ WHERE ROWNUM = 1
+;
+
+
 -- 64. 대륙 별 사원의 수를 조회한다.
+SELECT REG.REGION_NAME
+     , COUNT(EMP.EMPLOYEE_ID) 
+  FROM REGIONS REG
+  LEFT JOIN COUNTRIES CON
+    ON REG.REGION_ID = CON.REGION_ID
+  LEFT JOIN LOCATIONS LOC
+    ON CON.COUNTRY_ID = LOC.COUNTRY_ID
+  LEFT JOIN DEPARTMENTS DEP
+    ON LOC.LOCATION_ID = DEP.LOCATION_ID
+  LEFT JOIN EMPLOYEES EMP
+    ON DEP.DEPARTMENT_ID  = EMP.DEPARTMENT_ID
+ GROUP BY REG.REGION_NAME
+  ;
 -- 65. 연봉이 2500, 3500, 7000 이 아니며 
 --     직업이 SA_REP 이나 ST_CLERK 인 사람들을 조회한다.
+         SELECT *
+           FROM EMPLOYEES 
+          WHERE SALARY NOT IN ( 2500, 3500, 7000)
+            AND JOB_ID IN ('SA_REP', 'ST_CLERK')
+            ;
 -- 66. 사원의 사원번호, 이름, 성, 상사의 사원번호, 상사의 이름, 
 --     상사의 성을 조회한다.
+SELECT MAN.EMPLOYEE_ID 
+     , MAN.FIRST_NAME 
+     , MAN.LAST_NAME 
+     , EMP.EMPLOYEE_ID 
+     , EMP.FIRST_NAME 
+     , EMP.LAST_NAME 
+  FROM EMPLOYEES MAN
+ INNER JOIN EMPLOYEES EMP
+    ON MAN.EMPLOYEE_ID = EMP.MANAGER_ID 
+ ;
 -- 67. 101번 사원의 모든 부하직원 들의 이름, 성, 상사사원번호, 
 --     상사사원명을 조회한다.
+ SELECT *
+   FROM EMPLOYEES MAN
+  START WITH EMPLOYEE_ID = 101 
+CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID
+  ;
 -- 68. 114번 직원의 모든 상사들의 이름, 성, 상사사원번호, 
 --     상사사원명을 조회한다.
+ SELECT EMPLOYEE_ID 
+       , FIRST_NAME 
+       , LAST_NAME
+       , MANAGER_ID
+   FROM (SELECT EMPLOYEE_ID
+                 , FIRST_NAME 
+               , LAST_NAME 
+               , MANAGER_ID 
+           FROM EMPLOYEES 
+          START WITH EMPLOYEE_ID = 114
+        CONNECT BY PRIOR MANAGER_ID = EMPLOYEE_ID)
+  WHERE EMPLOYEE_ID != 114    
+; 
 -- 69. 114번 직원의 모든 상사들의 이름, 성, 상사사원번호, 
 --     상사사원명을 조회한다. 단, 역순으로 조회한다.
+ 
 -- 70. 모든 사원들을 연봉 오름차순 정렬하여 조회한다.
+ 
 -- 71. 모든 사원들을 이름 내림차순 정렬하여 조회한다.
+ 
 -- 72. 모든 사원들의 이름, 성, 연봉, 부서명을 
 --     부서번호로 내림차순 정렬하여 조회한다.
+ 
 -- 73. 부서별 연봉의 합을 내림차순 정렬하여 조회한다.
+ 
 -- 74. 직무별 사원의 수를 오름차순 정렬하여 조회한다.
+ 
 -- 75. 모든 사원들의 모든 정보를 조회한다. 
 --     단, 인센티브를 받는 사원은 "인센티브여부" 컬럼에 "Y"를, 
 --     아닌 경우 "N"으로 조회한다.
+ 
 -- 76. 모든 사원들의 이름을 10자리로 맞추어 조회한다.
+ 
 -- 77. 2007년에 직무가 변경된 사원들의 현재 직무명, 부서명, 
 --     사원번호, 이름, 성을 조회한다.
+ 
 -- 78. 직무별 최대연봉보다 더 많은 연봉을 받는 사원의 
 --     모든 정보를 조회한다.
+ 
 -- 79. 사원들의 입사일자 중 이름, 성, 연도만 조회한다.
+ 
 -- 80. 사원들의 입사일자 중 이름, 성, 연도, 월 만 조회한다.
+ 
 -- 81. 100번 사원의 모든 부하직원을 계층조회한다. 
 --     단, LEVEL이 4인 사원은 제외한다.
+ 
 -- 82. 많은 연봉을 받는 10명을 조회한다.
+ 
 -- 83. 가장 적은 연봉을 받는 사원의 상사명, 부서명을 조회한다.
+ 
 -- 84. 많은 연봉을 받는 사원 중 11번 째 부터 20번째를 조회한다.
 -- 85. 가장 적은 연봉을 받는 중 90번 째 부터 100번째를 조회한다.
 -- 86. 'PU_CLERK' 직무인 2번째 부터 5번째 사원의 부서명, 
