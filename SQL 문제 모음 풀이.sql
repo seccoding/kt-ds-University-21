@@ -860,13 +860,58 @@ SELECT *
          WHERE ROWNUM <= 20)
  WHERE RNUM >= 11
 ;
-
 -- 85. 가장 적은 연봉을 받는 중 90번 째 부터 100번째를 조회한다.
+SELECT *
+  FROM (SELECT ROWNUM RNUM
+             , EMP.*
+          FROM (SELECT *
+                  FROM EMPLOYEES
+                 ORDER BY SALARY ASC) EMP
+         WHERE ROWNUM <= 100)
+ WHERE RNUM >=90
+;
 -- 86. 'PU_CLERK' 직무인 2번째 부터 5번째 사원의 부서명, 
 --     직무명을 조회한다.
+SELECT EMP.EMPLOYEE_ID
+     , DEP.DEPARTMENT_NAME
+     , JOB.JOB_TITLE
+  FROM (SELECT *
+          FROM (SELECT E.EMPLOYEE_ID
+                     , E.DEPARTMENT_ID
+                     , E.JOB_ID
+                     , ROWNUM RNUM
+                  FROM EMPLOYEES E
+                 WHERE E.JOB_ID = 'PU_CLERK')
+         WHERE RNUM BETWEEN 2 AND 5) EMP
+  JOIN DEPARTMENTS DEP
+    ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID
+  JOIN JOBS JOB
+    ON JOB.JOB_ID = EMP.JOB_ID
+;
+ 
 -- 87. 모든 사원의 정보를 직무 오름차순, 연봉 내림차순으로 조회한다.
+SELECT *
+  FROM EMPLOYEES EMP
+ ORDER BY EMP.JOB_ID ASC
+     , SALARY DESC
+;
 -- 88. 직무별 평균연봉을 평균연봉순으로 오름차순 정렬하여 조회한다.
--- 89. 부서별 평균연봉을 최대연봉순으로 내림차순 정렬하여 조회한다.
+SELECT JOB_ID
+     , AVG_SALARY
+  FROM (SELECT JOB_ID
+             , AVG(SALARY) AVG_SALARY
+          FROM EMPLOYEES
+         GROUP BY JOB_ID)
+ ORDER BY AVG_SALARY
+;
+-- 89. 부서별 평균연봉을 내림차순 정렬하여 조회한다.
+SELECT AVG_EMP.*
+  FROM (SELECT EMP.DEPARTMENT_ID
+             , AVG(EMP.SALARY) AVG_SALARY
+          FROM EMPLOYEES EMP 
+         GROUP BY EMP.DEPARTMENT_ID) AVG_EMP
+ ORDER BY AVG_EMP.AVG_SALARY DESC
+ ;  
 -- 90. 이름의 첫 번째 글자별 평균연봉을 조회한다.
 -- 91. 연도별 최소연봉을 조회한다.
 -- 92. 월별 최대연봉 중 2번째 4번째 데이터만 조회한다.
