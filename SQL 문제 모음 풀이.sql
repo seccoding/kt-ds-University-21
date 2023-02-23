@@ -1177,8 +1177,9 @@ WITH HIRE_DATE_109 AS (SELECT HIRE_DATE
 SELECT *
   FROM EMPLOYEES
  WHERE HIRE_DATE BETWEEN (SELECT HIRE_DATE
-                            FROM HIRE_DATE_109) AND (SELECT ADD_MONTHS(HIRE_DATE, 12)
-                                                       FROM HIRE_DATE_109)
+                            FROM HIRE_DATE_109) 
+             AND (SELECT ADD_MONTHS(HIRE_DATE, 12)
+                    FROM HIRE_DATE_109)
 ;
 
 
@@ -1210,10 +1211,10 @@ SELECT *
 -- 113. 가장 먼저 입사한 사원의 입사일로부터 2년 내에 입사한 
 --      사원의 모든 정보를 조회한다.
 WITH FIRST_HIRE_DATE AS (SELECT HIRE_DATE
-                              , ADD_MONTHS(HIRE_DATE, 24) AFTER_TWO_YEARS
-                           FROM EMPLOYEES
-                          WHERE HIRE_DATE = (SELECT MIN(HIRE_DATE)
-                                               FROM EMPLOYEES))
+         , ADD_MONTHS(HIRE_DATE, 24) AFTER_TWO_YEARS
+      FROM EMPLOYEES
+     WHERE HIRE_DATE = (SELECT MIN(HIRE_DATE)
+                          FROM EMPLOYEES))
 SELECT *
   FROM EMPLOYEES
  WHERE HIRE_DATE >= (SELECT HIRE_DATE
@@ -1272,41 +1273,112 @@ SELECT DEP.DEPARTMENT_NAME
  
 -- 116. MOD 함수를 통해 사원번호가 홀수면 남자, 
 --      짝수면 여자 로 구분해 조회한다. MOD(값, 나눌값)
+SELECT MOD (EMPLOYEE_ID, 2) 
+     , CASE   
+          WHEN MOD(EMPLOYEE_ID, 2) = 0 THEN
+          '여자'
+          WHEN MOD(EMPLOYEE_ID, 2) = 1 THEN
+          '남자'
+        END
+  FROM EMPLOYEES EMP
+;
 
+SELECT CASE MOD(EMPLOYEE_ID, 2) 
+        WHEN 0 THEN
+            '여자'
+        ELSE
+            '남자'
+       END "성별"
+  FROM EMPLOYEES
+;
+SELECT DECODE(MOD(EMPLOYEE_ID, 2)
+            , 0, '여자'
+            , '남자')
+  FROM EMPLOYEES
+;
 -- 117. '20230222' 문자 데이터를 날짜로 변환해 조회한다.
 --      (DUAL)
-
+SELECT TO_DATE('20230222','YYYY-MM-DD') "DATE"
+  FROM DUAL
+;
 -- 118. '20230222' 문자 데이터를 'YYYY-MM' 으로 변환해 조회한다.
 --      (DUAL)
-
+SELECT TO_DATE('20230222','YYYY-MM-DD') 
+     , TO_CHAR(TO_DATE('20230222','YYYY-MM-DD'),'YYYY-MM')
+  FROM DUAL
+;
 -- 119. '20230222130140' 문자 데이터를 
 --      'YYYY-MM-DD HH24:MI:SS' 으로 변환해 조회한다. (DUAL)
-
+SELECT TO_DATE('20230222130140', 'YYYY-MM-DD HH24:MI:SS')
+  FROM DUAL
+;
 -- 120. '20230222' 날짜의 열흘 후의 날짜를 
 --      'YYYY-MM-DD' 으로 변환해 조회한다. (DUAL)
-
+SELECT TO_CHAR(TO_DATE('20230222', 'YYYY-MM-DD')+10, 'YYYY-MM-DD')
+  FROM DUAL
+;
 -- 121. 사원 이름의 글자수 별 사원의 수를 조회한다.
-
+SELECT NAME_LEN
+     , COUNT(1)
+  FROM (SELECT LENGTH(FIRST_NAME) NAME_LEN
+          FROM EMPLOYEES)
+ GROUP BY NAME_LEN
+;
 -- 122. 사원 성의 글자수 별 사원의 수를 조회한다.
-
+SELECT NAME_LEN
+     , COUNT(1)
+  FROM (SELECT LENGTH(LAST_NAME) NAME_LEN
+          FROM EMPLOYEES)
+ GROUP BY NAME_LEN
+ ;
 -- 123. 사원의 연봉이 5000 이하이면 "사원", 
 --      7000 이하이면 "대리", 
 --      9000 이하이면 "과장", 그 외에는 임원 으로 조회한다.
-
+SELECT SALARY
+     , CASE
+         WHEN SALARY <= 5000 THEN
+            '사원'
+         WHEN SALARY <= 7000 THEN
+            '대리'
+         WHEN SALARY <= 9000 THEN
+            '과장'
+         ELSE
+            '임원'
+     END
+  FROM EMPLOYEES
+  ;
 -- 124. 부서별 사원의 수를 조인을 이용해 다음과 같이 조회한다.
 --      "부서명 (사원의 수)"
-
+SELECT DEP.DEPARTMENT_NAME || ' (' || COUNT(EMP.EMPLOYEE_ID) || ')' "부서명 (사원의 수)"
+  FROM EMPLOYEES EMP
+  JOIN DEPARTMENTS DEP
+    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+ GROUP BY DEP.DEPARTMENT_NAME
+;
 -- 125. 부서별 사원의 수를 스칼라쿼리를 이용해 다음과 같이 조회한다. 
 --      "부서명 (사원의 수)"
-
+SELECT DEPARTMENT_NAME || ' (' || (SELECT COUNT(1)
+                                     FROM EMPLOYEES E
+                                    WHERE D.DEPARTMENT_ID = E.DEPARTMENT_ID) || ')' "부서명 (사원의 수)"
+  FROM DEPARTMENTS D
+;
 -- 126. 사원의 정보를 다음과 같이 조회한다. 
 --      "사원번호 번 사원의 이름은 성이름 입니다."
+        SELECT EMPLOYEE_ID || '번 사원의 이름은' || FIRST_NAME || LAST_NAME || '입니다' AS "사원번호 이름" 
+          FROM EMPLOYEES
+             ;
 -- 127. 사원의 정보를 스칼라쿼리를 이용해 다음과 같이 조회한다. 
 --      "사원번호 번 사원의 상사명은 상사명 입니다."
-
--- 128. 사원의 정보를 조인을 이용해 다음고 같이 조회한다. 
+        
+                SELECT EMPLOYEE_ID || '번 사원의 상사명은' || ( SELECT MAN.FIRST_NAME
+                                                            FROM EMPLOYEES MAN
+                                                           WHERE EMP.MANAGER_ID = MAN.EMPLOYEE_ID) || '입니다' AS "사원의 상사명"
+                 FROM EMPLOYEES EMP
+                WHERE MANAGER_ID  IS NOT NULL 
+                 ;
+-- 128. 사원의 정보를 조인을 이용해 다음과 같이 조회한다. 
 --      "사원명 (직무명)"
-
+        
 -- 129. 사원의 정보를 스칼라쿼리를 이용해 다음과 같이 조회한다. 
 --      "사원명 (직무명)"
 
@@ -1342,6 +1414,7 @@ SELECT DEP.DEPARTMENT_NAME
 -- 140. 사원의 연봉을 TRUNK(소수점 버림) 함수를 사용해 
 --      100 단위는 버린채 다음과 같이 조회한다.  
 --      예> 3700 -> 3000, 12700 -> 12000
+
 -- 141. 100단위를 버린 사원의 연봉 별 사원의 수를 조회한다.
 
 -- 142. 현재 시간으로부터 20년 전 보다 일찍 입사한 사원의 
