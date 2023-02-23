@@ -1378,31 +1378,132 @@ SELECT DEPARTMENT_NAME || ' (' || (SELECT COUNT(1)
                  ;
 -- 128. 사원의 정보를 조인을 이용해 다음과 같이 조회한다. 
 --      "사원명 (직무명)"
-        
+        SELECT EMP.FIRST_NAME || ' (  ' || JOB.JOB_TITLE || '  )  '  AS "사원명(직무명)"
+          FROM EMPLOYEES EMP
+         INNER JOIN JOBS JOB 
+            ON EMP.JOB_ID = JOB.JOB_ID
+            ;
 -- 129. 사원의 정보를 스칼라쿼리를 이용해 다음과 같이 조회한다. 
 --      "사원명 (직무명)"
-
+SELECT FIRST_NAME || ' (' || (SELECT JOB_TITLE
+                                FROM JOBS JOB
+                               WHERE JOB.JOB_ID = EMP.JOB_ID) || ')'
+  FROM EMPLOYEES EMP;
+        
 -- 130. 부서별 연봉 차이(최고연봉 - 최저연봉)가 가장 큰 
 --      부서명을 조회한다.
-
+-- 부서별 연봉 차이
+ 
+-- 부서별 연봉 차이(최고연봉 - 최저연봉)가 가장 큰 부서명 조회
+SELECT DEPARTMENT_NAME
+     , SAL_DIFF
+  FROM (SELECT DEPARTMENT_NAME
+             , SAL_DIFF
+          FROM (SELECT DEP.DEPARTMENT_NAME
+                     , MAX(EMP.SALARY) - MIN(EMP.SALARY) SAL_DIFF
+                  FROM DEPARTMENTS DEP
+                  JOIN EMPLOYEES EMP
+                    ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID
+                 GROUP BY DEP.DEPARTMENT_NAME)
+         ORDER BY SAL_DIFF DESC)
+  WHERE ROWNUM < 2
+;
 -- 131. 부서별 연봉 차이(최고연봉 - 최저연봉)가 가장 큰 
 --      부서에서 근무하는 사원들의 직무명을 중복없이 조회한다.
-
+SELECT EMP.DEPARTMENT_ID
+     , MAX(SALARY) - MIN(SALARY)
+  FROM EMPLOYEES EMP
+ INNER JOIN DEPARTMENTS DEP
+    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+ GROUP BY EMP.DEPARTMENT_ID;
+ 
+SELECT DEPARTMENT_ID
+     , GAP
+  FROM (SELECT EMP.DEPARTMENT_ID
+             , (MAX(SALARY) - MIN(SALARY)) GAP
+          FROM EMPLOYEES EMP
+         INNER JOIN DEPARTMENTS DEP
+            ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+         GROUP BY EMP.DEPARTMENT_ID)
+ ORDER BY GAP DESC;
+ 
+SELECT DEPARTMENT_ID
+  FROM (SELECT DEPARTMENT_ID
+            , GAP
+          FROM (SELECT EMP.DEPARTMENT_ID
+                     , (MAX(SALARY) - MIN(SALARY)) GAP
+                  FROM EMPLOYEES EMP
+                 INNER JOIN DEPARTMENTS DEP
+                    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+                 GROUP BY EMP.DEPARTMENT_ID)
+         ORDER BY GAP DESC)
+ WHERE ROWNUM = 1;
+ 
+SELECT DISTINCT JOB.JOB_TITLE
+  FROM EMPLOYEES EMP
+ INNER JOIN JOBS JOB
+    ON EMP.JOB_ID = JOB.JOB_ID
+ WHERE EMP.DEPARTMENT_ID = (SELECT DEPARTMENT_ID
+                              FROM (SELECT DEPARTMENT_ID
+                                         , GAP
+                                      FROM (SELECT EMP.DEPARTMENT_ID
+                                                 , (MAX(SALARY) - MIN(SALARY)) GAP
+                                              FROM EMPLOYEES EMP
+                                             INNER JOIN DEPARTMENTS DEP
+                                                ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+                                             GROUP BY EMP.DEPARTMENT_ID)
+                                     ORDER BY GAP DESC)
+                             WHERE ROWNUM = 1)
+;
 -- 132. 부서장이 없는 부서명 중 첫 글자가 'C' 로 시작하는 
 --      부서명을 조회한다.
-
+SELECT DEP.DEPARTMENT_NAME
+  FROM DEPARTMENTS DEP
+ WHERE DEP.MANAGER_ID IS NULL
+   AND DEP.DEPARTMENT_NAME LIKE 'C%'
+;  
 -- 133. 부서장이 있는 부서명 중 첫 글자가 'S' 로 시작하는 
 --      부서에서 근무중인 사원의 이름과 직무명, 부서명을 조회한다.
-
+SELECT EMP.FIRST_NAME
+     , JOB.JOB_TITLE
+     , DEP.DEPARTMENT_NAME
+  FROM DEPARTMENTS DEP
+ INNER JOIN EMPLOYEES EMP
+    ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID
+ INNER JOIN JOBS JOB
+    ON EMP.JOB_ID = JOB.JOB_ID
+ WHERE DEP.MANAGER_ID IS NOT NULL
+   AND DEP.DEPARTMENT_NAME LIKE 'S%'
+;   
 -- 134. 지역변호가 1000 ~ 1999 사이인 지역내 부서의 
 --      모든 정보를 조회한다.
-
+SELECT *
+  FROM DEPARTMENTS DEP
+ WHERE LOCATION_ID <= 1999
+   AND LOCATION_ID >= 1000
+   ;
 -- 135. 90, 60, 100번 부서에서 근무중인 사원의 
 --      이름, 성, 부서명을 조회한다.
-
+        SELECT EMP.FIRST_NAME
+             , EMP.LAST_NAME
+             , DEP.DEPARTMENT_NAME
+          FROM EMPLOYEES EMP
+         INNER JOIN DEPARTMENTS DEP
+            ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID
+         WHERE DEP.DEPARTMENT_ID IN (90, 60, 100)
+;
 -- 136. 부서명이 5글자 미만인 부서에서 근무중인 사원의 
 --      이름, 부서명을 조회한다.
-
+SELECT EMP.FIRST_NAME
+     , DEP.DEPARTMENT_NAME
+  FROM (SELECT LENGTH(DEPARTMENT_NAME) LEN
+             , DEPARTMENT_NAME
+             , DEPARTMENT_ID
+          FROM DEPARTMENTS) DEP
+  JOIN EMPLOYEES EMP 
+    ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID
+ WHERE DEP.LEN < 5 
+;
 -- 137. 국가 아이디가 'C'로 시작하는 국가의 지역을 모두 조회한다.
 
 -- 138. 국가 아이디의 첫 글자와 국가명의 
