@@ -1505,38 +1505,134 @@ SELECT EMP.FIRST_NAME
  WHERE DEP.LEN < 5 
 ;
 -- 137. 국가 아이디가 'C'로 시작하는 국가의 지역을 모두 조회한다.
-
+SELECT L.*
+  FROM LOCATIONS L
+ INNER JOIN COUNTRIES C
+    ON C.COUNTRY_ID = L.COUNTRY_ID
+ WHERE L.COUNTRY_ID LIKE 'C%'
+;
 -- 138. 국가 아이디의 첫 글자와 국가명의 
 --      첫 글자가 다른 모든 국가를 조회한다.
-
+SELECT COUNTRY_NAME
+  FROM (SELECT SUBSTR(COUNTRY_ID, 1, 1) FIRST_ID
+             , SUBSTR(COUNTRY_NAME, 1, 1) FIRST_NAME
+             , COUNTRY_NAME
+          FROM COUNTRIES)
+ WHERE FIRST_ID != FIRST_NAME
+;
 -- 139. 사원 모든 정보 중 이메일만 모두 소문자로 
 --      변경하여 조회한다.
-
--- 140. 사원의 연봉을 TRUNK(소수점 버림) 함수를 사용해 
+SELECT EMPLOYEE_ID
+     , FIRST_NAME
+     , LAST_NAME
+     , LOWER(EMAIL)
+     , PHONE_NUMBER
+     , HIRE_DATE
+     , JOB_ID
+     , SALARY
+     , COMMISSION_PCT
+     , MANAGER_ID
+     , DEPARTMENT_ID
+  FROM EMPLOYEES
+;
+-- 140. 사원의 연봉을 TRUNC(소수점 버림) 함수를 사용해 
 --      100 단위는 버린채 다음과 같이 조회한다.  
 --      예> 3700 -> 3000, 12700 -> 12000
-
+SELECT TRUNC(SALARY/1000)*1000
+  FROM EMPLOYEES
+;
 -- 141. 100단위를 버린 사원의 연봉 별 사원의 수를 조회한다.
+SELECT TRUNC_SAL
+     , COUNT(1)
+  FROM (SELECT TRUNC(SALARY, -3) TRUNC_SAL
+          FROM EMPLOYEES)
+ GROUP BY TRUNC_SAL
+;
 
+  
 -- 142. 현재 시간으로부터 20년 전 보다 일찍 입사한 사원의 
 --      모든 정보를 조회한다.
-
--- 143. 부서번호별 현재 시간으로부터 15년 전 보다 일찍 입사한 
+SELECT *
+  FROM EMPLOYEES 
+ WHERE HIRE_DATE < ADD_MONTHS(SYSDATE, -12*20)
+;
+ -- 143. 부서번호별 현재 시간으로부터 15년 전 보다 일찍 입사한 
 --      사원의 수를 조회한다.
-
+SELECT DEPARTMENT_ID
+     , COUNT(1)
+  FROM EMPLOYEES
+ WHERE HIRE_DATE < ADD_MONTHS(SYSDATE, -180)
+ GROUP BY DEPARTMENT_ID
+;
 -- 144. 부서명, 직무명 별 평균 연봉을 조회한다.
-
+SELECT DEP.DEPARTMENT_NAME
+     , JOB.JOB_TITLE
+     , AVG(SALARY)
+  FROM EMPLOYEES EMP
+ INNER JOIN DEPARTMENTS DEP
+    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+ INNER JOIN JOBS JOB
+    ON EMP.JOB_ID = JOB.JOB_ID
+ GROUP BY DEP.DEPARTMENT_NAME
+     , JOB.JOB_TITLE
+;  
 -- 145. 도시명, 지역명 별 사원의 수를 조회한다.
-
+SELECT NVL(LOC.CITY, '무엇인가')
+     , LOC.STATE_PROVINCE
+     , COUNT(EMP.EMPLOYEE_ID) "사원 수"
+  FROM EMPLOYEES EMP
+ RIGHT OUTER JOIN DEPARTMENTS DEP
+    ON EMP.DEPARTMENT_ID = DEP.DEPARTMENT_ID
+ RIGHT OUTER JOIN LOCATIONS LOC
+    ON DEP.LOCATION_ID = LOC.LOCATION_ID
+ GROUP BY LOC.CITY
+     , LOC.STATE_PROVINCE
+;
 -- 146. 부서명, 직무명 별 평균 연봉 중 
 --      가장 작은 평균연봉을 받는 부서명, 직무명을 조회한다.
-
+SELECT DEPARTMENT_NAME
+     , JOB_TITLE
+  FROM (SELECT DEPARTMENT_NAME
+             , JOB_TITLE
+          FROM (SELECT DEP.DEPARTMENT_NAME
+                     , JOB.JOB_TITLE
+                     , AVG(EMP.SALARY) AES
+                  FROM EMPLOYEES EMP
+                 INNER JOIN JOBS JOB
+                    ON EMP.JOB_ID = JOB.JOB_ID
+                 INNER JOIN DEPARTMENTS DEP
+                    ON DEP.DEPARTMENT_ID = EMP.DEPARTMENT_ID
+                 GROUP BY DEP.DEPARTMENT_NAME
+                     , JOB.JOB_TITLE)
+         ORDER BY AES ASC)
+ WHERE ROWNUM < 2    
+;
 -- 147. 102번 직원의 모든 부하직원의 수를 조회한다.
-
+-- 102번 직원, 모든 부하직원의 수 조회?
+ SELECT COUNT(1)-1 "부하직원 수"
+   FROM EMPLOYEES E
+  START WITH E.EMPLOYEE_ID = 102
+CONNECT BY PRIOR E.EMPLOYEE_ID = E.MANAGER_ID
+;
 -- 148. 113번 직원의 모든 부하직원의 수를 조회한다.
-
+ SELECT COUNT(1) - 1
+   FROM EMPLOYEES
+  START WITH EMPLOYEE_ID = 113
+CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID
+;
 -- 149. 부하직원이 없는 사원의 모든 정보를 조회한다.
-
+SELECT *
+  FROM EMPLOYEES EMP
+ WHERE NOT EXISTS (SELECT *
+                     FROM EMPLOYEES MGN
+                    WHERE EMP.EMPLOYEE_ID = MGN.MANAGER_ID) 
+ ;
+SELECT *
+  FROM EMPLOYEES EMP
+ WHERE EMPLOYEE_ID NOT IN (SELECT MGN.MANAGER_ID
+                             FROM EMPLOYEES MGN
+                            WHERE MGN.MANAGER_ID IS NOT NULL)
+;
 -- 150. 사원번호가 100번인 사원의 사원번호, 이름과 
 --      사원번호로 내림차순 정렬된 사원의 사원번호, 이름 조회한다.
 /*조회 예
