@@ -1,5 +1,7 @@
 package com.ktdsuniversity.edu.goodgag.utils.db;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,7 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractDaoPoolSupport {
+public abstract class AbstractDaoPoolSupport<T> {
 
 	private final String URL = "jdbc:oracle:thin:@localhost:1521:XE";
 	private final String userName = "BBS";
@@ -34,7 +36,6 @@ public abstract class AbstractDaoPoolSupport {
 			e.printStackTrace();
 		}
 	}
-	
 	
 	private Connection getConnection() {
 		if (connectionPool.size() == this.poolSize) {
@@ -69,7 +70,88 @@ public abstract class AbstractDaoPoolSupport {
 		}
 	}
 	
-	public <T> List<T> select(String query, ParamMapper pm, ResultMapper<T> rm) {
+	public int selectOneInt(String query, ParamMapper pm, ResultMapper<String> rm) {
+		String result = selectOneString(query, pm, rm);
+		if (result == null) {
+			return 0;
+		}
+		return Integer.parseInt(result);
+	}
+	
+	public String selectOneString(String query, ParamMapper pm, ResultMapper<String> rm) {
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = getConnection();
+			pstmt = connection.prepareStatement(query);
+			if (pm != null) {
+				pm.map(pstmt);
+			}
+			rs = pstmt.executeQuery();
+			String result = null;
+			if (rs.next()) {
+				result = rm.map(rs);
+			}
+			return result;
+		}
+		catch (SQLException sqle) {
+			sqle.printStackTrace();
+		}
+		finally {
+			closeAll(connection, pstmt, rs);
+		}
+		
+		return null;
+	}
+	
+	public List<T> selectByKey(String query, String column, String getterName, ParamMapper pm, ResultKeyMapper<T> rm) {
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = getConnection();
+			pstmt = connection.prepareStatement(query);
+			if (pm != null) {
+				pm.map(pstmt);
+			}
+			rs = pstmt.executeQuery();
+			List<T> t = new ArrayList<>();
+			while (rs.next()) {
+				boolean isDuplicated = false;
+				String key = rs.getString(column);
+				for (T item: t) {
+					Method getter = item.getClass().getDeclaredMethod(getterName);
+					if (getter != null) {
+						getter.setAccessible(true);
+						String getterValue = (String) getter.invoke(item);
+						if (getterValue.equals(key)) {
+							rm.map(rs, item, key);
+							isDuplicated = true;
+							break;
+						}
+					}
+				}
+				
+				if (!isDuplicated) {
+					t.add((T) rm.map(rs, null, key));
+				}
+			}
+			return (List<T>) t;
+		}
+		catch (SQLException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException sqle) {
+			sqle.printStackTrace();
+		}
+		finally {
+			closeAll(connection, pstmt, rs);
+		}
+		
+		return null;
+	}
+	
+	public List<T> select(String query, ParamMapper pm, ResultMapper<T> rm) {
 		Connection connection = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -85,7 +167,7 @@ public abstract class AbstractDaoPoolSupport {
 			while (rs.next()) {
 				t.add((T) rm.map(rs));
 			}
-			return (List<T>) t;
+			return t;
 		}
 		catch (SQLException sqle) {
 			sqle.printStackTrace();
@@ -97,7 +179,49 @@ public abstract class AbstractDaoPoolSupport {
 		return null;
 	}
 	
-	public <T> T selectOne(String query, ParamMapper pm, ResultMapper<T> rm) {
+	public T selectOneByKey(String query, String column, String getterName, ParamMapper pm, ResultKeyMapper<T> rm) {
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = getConnection();
+			pstmt = connection.prepareStatement(query);
+			if (pm != null) {
+				pm.map(pstmt);
+			}
+			rs = pstmt.executeQuery();
+			T result = null;
+			
+			while (rs.next()) {
+				String key = rs.getString(column);
+				if (result == null) {
+					result = rm.map(rs, null, key);
+				}
+				else {
+					Method getter = result.getClass().getDeclaredMethod(getterName);
+					if (getter != null) {
+						getter.setAccessible(true);
+						String getterValue = (String) getter.invoke(result);
+						if (getterValue.equals(key)) {
+							rm.map(rs, result, key);
+						}
+					}
+				}
+			}
+			return result;
+		}
+		catch (SQLException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException sqle) {
+			sqle.printStackTrace();
+		}
+		finally {
+			closeAll(connection, pstmt, rs);
+		}
+		
+		return null;
+	}
+	
+	public T selectOne(String query, ParamMapper pm, ResultMapper<T> rm) {
 		Connection connection = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -163,5 +287,10 @@ public abstract class AbstractDaoPoolSupport {
 	@FunctionalInterface
 	public static interface ResultMapper<T> {
 		public T map(ResultSet rs) throws SQLException;
+	}
+	
+	@FunctionalInterface
+	public static interface ResultKeyMapper<T> {
+		public T map(ResultSet rs, T t, String keyValue) throws SQLException;
 	}
 }
