@@ -25,9 +25,15 @@ public final class AutoMapper {
 		}
 		
 		UseColumn useColumn = cls.getDeclaredAnnotation(UseColumn.class);
-		String keyColumnName = useColumn.keyColum();
 		String keyFieldName = useColumn.keyVarName();
-		Class<?> keyFieldType = useColumn.keyType();
+		String keyColumnName = null;
+		try {
+			keyColumnName = cls.getDeclaredField(keyFieldName).getDeclaredAnnotation(Column.class).value();
+		} catch (NoSuchFieldException | SecurityException e1) {}
+		Class<?> keyFieldType = null;
+		try {
+			keyFieldType = cls.getDeclaredField(keyFieldName).getType();
+		} catch (NoSuchFieldException | SecurityException e1) {}
 		
 		boolean isMatchKeyData = false;
 		
@@ -89,9 +95,15 @@ public final class AutoMapper {
 		}
 		
 		UseColumn useColumn = cls.getDeclaredAnnotation(UseColumn.class);
-		String keyColumnName = useColumn.keyColum();
 		String keyFieldName = useColumn.keyVarName();
-		Class<?> keyFieldType = useColumn.keyType();
+		String keyColumnName = null;
+		try {
+			keyColumnName = cls.getDeclaredField(keyFieldName).getDeclaredAnnotation(Column.class).value();
+		} catch (NoSuchFieldException | SecurityException e1) {}
+		Class<?> keyFieldType = null;
+		try {
+			keyFieldType = cls.getDeclaredField(keyFieldName).getType();
+		} catch (NoSuchFieldException | SecurityException e1) {}
 		
 		boolean isMatchKeyData = false;
 		
@@ -210,7 +222,17 @@ public final class AutoMapper {
 					
 					UseColumn useColumn = itemInList.getClass().getDeclaredAnnotation(UseColumn.class);
 					String keyFieldName = useColumn.keyVarName();
-					Class<?> keyFieldType = useColumn.keyType();
+					if (keyFieldName.trim().length() == 0) {
+						keyFieldName = null;
+					}
+					Class<?> keyFieldType = null;
+					if (keyFieldName != null) {
+						try {
+							keyFieldType = itemInList.getClass().getDeclaredField(keyFieldName).getType();
+						} catch (NoSuchFieldException | SecurityException e) {
+							continue;
+						}
+					}
 					
 					boolean isDuplicate = false;
 					if (keyFieldName != null) {
