@@ -205,6 +205,7 @@ public final class AutoMapper {
 								int itemKeyValue = getIntKeyValue(objInList, keyFieldName);
 								if (keyValue == itemKeyValue) {
 									isDuplicate = true;
+									break;
 								}
 							}
 						}
@@ -214,6 +215,7 @@ public final class AutoMapper {
 								String itemKeyValue = getStringKeyValue(objInList, keyFieldName);
 								if (keyValue.equals(itemKeyValue)) {
 									isDuplicate = true;
+									break;
 								}
 							}
 						}
