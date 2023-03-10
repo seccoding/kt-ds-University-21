@@ -145,7 +145,7 @@ public final class AutoMapper {
 		return valueObject;
 	}
 	
-	public static Object makeOneRowDatas(ResultSet rs, Object valueObject, Class<? extends Object> cls) {
+	private static Object makeOneRowDatas(ResultSet rs, Object valueObject, Class<? extends Object> cls, Class<? extends Object> superCls) {
 		if (cls == null) {
 			return null;
 		}
@@ -165,11 +165,26 @@ public final class AutoMapper {
 			}
 		}
 		
-		
 		if (valueObject == null) {
 			valueObject = createNewObject(cls);
 		}
 		
+		if (superCls != Object.class) {
+			setFieldValueFromResultSet(rs, valueObject, superCls.getDeclaredFields());
+		}
+		setFieldValueFromResultSet(rs, valueObject, fields);
+		
+		return valueObject;
+	}
+	
+	public static Object makeOneRowDatas(ResultSet rs, Object valueObject, Class<? extends Object> cls) {
+		if (cls == null) {
+			return null;
+		}
+		return makeOneRowDatas(rs, valueObject, cls, cls.getSuperclass());
+	}
+	
+	private static void setFieldValueFromResultSet(ResultSet rs, Object valueObject, Field[] fields) {
 		for (Field field : fields) {
 			field.setAccessible(true);
 			Class<?> fieldClass = field.getDeclaringClass();
@@ -235,8 +250,6 @@ public final class AutoMapper {
 				}
 			}
 		}
-		
-		return valueObject;
 	}
 	
 	private static int getIntKeyValue(Object obj, String keyFieldName) {
